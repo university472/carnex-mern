@@ -1,0 +1,91 @@
+// const mongoose = require('mongoose')
+
+// const sourcingRequestSchema = new mongoose.Schema(
+//   {
+//     name: { type: String, required: true, trim: true, maxlength: 120 },
+//     email: { type: String, required: true, trim: true, lowercase: true },
+//     phone: { type: String, required: true, trim: true },
+
+//     desiredYearMin: { type: Number },
+//     desiredYearMax: { type: Number },
+//     desiredMake: { type: String, trim: true },
+//     desiredModel: { type: String, trim: true },
+//     desiredBodyType: { type: String, trim: true },
+//     desiredBudgetMax: { type: Number, min: 0 },
+
+//     mustHaveFeatures: { type: String, trim: true, maxlength: 2000 },
+
+//     status: {
+//       type: String,
+//       enum: ['new', 'searching', 'matched', 'closed', 'archived'],
+//       default: 'new'
+//     },
+
+//     source: { type: String, trim: true, default: 'website' },
+
+//     ip: String,
+//     userAgent: String
+//   },
+//   { timestamps: true }
+// )
+
+// sourcingRequestSchema.index({ createdAt: -1, status: 1 })
+
+// const SourcingRequest = mongoose.model('SourcingRequest', sourcingRequestSchema)
+
+// module.exports = SourcingRequest
+
+// server/src/models/SourcingRequest.js
+const mongoose = require('mongoose')
+
+const sourcingRequestSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 120
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true
+    },
+    phone: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    desiredYearMin: { type: Number },
+    desiredYearMax: { type: Number },
+    desiredMake: { type: String, trim: true },
+    desiredModel: { type: String, trim: true },
+    desiredBodyType: { type: String, trim: true },
+    desiredBudgetMax: { type: Number, min: 0 },
+    mustHaveFeatures: {
+      type: String,
+      trim: true,
+      maxlength: 2000
+    },
+    status: {
+      type: String,
+      enum: ['new', 'searching', 'matched', 'closed', 'archived'],
+      default: 'new'
+    },
+    source: {
+      type: String,
+      trim: true,
+      default: 'website'
+    },
+    ip: String,
+    userAgent: String
+  },
+  { timestamps: true }
+)
+
+sourcingRequestSchema.index({ createdAt: -1, status: 1 })
+
+const SourcingRequest = mongoose.model('SourcingRequest', sourcingRequestSchema)
+
+module.exports = SourcingRequest

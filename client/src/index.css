@@ -1,0 +1,74 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
+/* client/src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base layer: global typography & layout */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-inter bg-brand-bg text-brand-text antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-semibold text-brand-secondary;
+  }
+}
+
+/* Typography scale helpers */
+@layer components {
+  .text-hero-title {
+    @apply text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight;
+  }
+
+  .text-page-title {
+    @apply text-2xl sm:text-3xl font-semibold tracking-tight;
+  }
+
+  .text-section-title {
+    @apply text-xl sm:text-2xl font-semibold tracking-tight;
+  }
+
+  .text-card-title {
+    @apply text-lg font-semibold;
+  }
+
+  .text-body {
+    @apply text-base text-brand-text;
+  }
+
+  .text-body-muted {
+    @apply text-sm text-brand-muted;
+  }
+
+  .text-small {
+    @apply text-xs text-brand-muted;
+  }
+}
+
+/* Utility components for layout */
+@layer components {
+  .page-shell {
+    @apply min-h-screen bg-brand-bg text-brand-text;
+  }
+
+  .page-content {
+    @apply container py-6 sm:py-8 lg:py-10;
+  }
+
+  .card-surface {
+    @apply bg-brand-surface rounded-card shadow-card border border-brand-border;
+  }
+}
