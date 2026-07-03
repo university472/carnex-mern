@@ -1,33 +1,48 @@
+// // server/src/models/TradeInRequest.js
 // const mongoose = require('mongoose')
 
 // const tradeInRequestSchema = new mongoose.Schema(
 //   {
-//     // Contact
-//     name: { type: String, required: true, trim: true, maxlength: 120 },
-//     email: { type: String, required: true, trim: true, lowercase: true },
-//     phone: { type: String, required: true, trim: true },
-
+//     // Frontend sends `name` as single field
+//     name: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//       maxlength: 120
+//     },
+//     email: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//       lowercase: true
+//     },
+//     phone: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//       minlength: 7,
+//       maxlength: 20
+//     },
 //     // Vehicle being traded
-//     year: { type: Number, required: true },
-//     make: { type: String, required: true, trim: true },
-//     model: { type: String, required: true, trim: true },
+//     year: { type: Number },
+//     make: { type: String, trim: true },
+//     model: { type: String, trim: true },
 //     mileage: { type: Number, min: 0 },
 //     vin: { type: String, trim: true, uppercase: true },
 //     condition: { type: String, trim: true },
-
-//     // Desired vehicle / notes
 //     desiredVehicle: { type: String, trim: true },
 //     notes: { type: String, trim: true, maxlength: 2000 },
-
 //     status: {
 //       type: String,
 //       enum: ['new', 'contacted', 'appraised', 'completed', 'archived'],
 //       default: 'new'
 //     },
-
-//     source: { type: String, trim: true, default: 'website' },
-
-//     ip: String,
+//     source: {
+//       type: String,
+//       trim: true,
+//       default: 'website'
+//     },
+//     ipHash: String,
 //     userAgent: String
 //   },
 //   { timestamps: true }
@@ -39,30 +54,19 @@
 
 // module.exports = TradeInRequest
 
-// server/src/models/TradeInRequest.js
 const mongoose = require('mongoose')
 
 const tradeInRequestSchema = new mongoose.Schema(
   {
-    // Frontend sends `name` as single field
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 120
-    },
-    email: {
-      type: String,
-      required: true,
-      trim: true,
-      lowercase: true
-    },
+    name: { type: String, required: true, trim: true, maxlength: 120 },
+    email: { type: String, required: true, trim: true, lowercase: true },
     phone: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
+      minlength: 7,
+      maxlength: 20
     },
-    // Vehicle being traded
     year: { type: Number },
     make: { type: String, trim: true },
     model: { type: String, trim: true },
@@ -76,13 +80,14 @@ const tradeInRequestSchema = new mongoose.Schema(
       enum: ['new', 'contacted', 'appraised', 'completed', 'archived'],
       default: 'new'
     },
-    source: {
-      type: String,
-      trim: true,
-      default: 'website'
-    },
-    ip: String,
-    userAgent: String
+    source: { type: String, trim: true, default: 'website' },
+    ipHash: String,
+    userAgent: String,
+    consent: {
+      accepted: { type: Boolean, required: true, default: false },
+      acceptedAt: { type: Date },
+      textVersion: { type: String, default: 'v1.0' }
+    }
   },
   { timestamps: true }
 )

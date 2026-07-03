@@ -7,26 +7,30 @@ if (!MONGODB_URI) {
   throw new Error('MONGODB_URI is not defined in environment variables')
 }
 
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err.message)
+})
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('MongoDB disconnected')
+})
+
+mongoose.connection.on('reconnected', () => {
+  console.log('MongoDB reconnected')
+})
+
 async function connectDB() {
   try {
-    await mongoose.connect(MONGODB_URI, {
+    const conn = await mongoose.connect(MONGODB_URI, {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 30000,
       socketTimeoutMS: 45000
     })
 
-    const conn = mongoose.connection
-    console.log(`MongoDB connected: ${conn.host}`)
-
-    conn.on('error', (err) => {
-      console.error('MongoDB connection error:', err.message)
-    })
-
-    conn.on('disconnected', () => {
-      console.warn('MongoDB disconnected')
-    })
+    console.log(`MongoDB connected: ${conn.connection.host}`)
   } catch (error) {
     console.error('MongoDB initial connection error:', error.message)
+
     process.exit(1)
   }
 }

@@ -3,12 +3,39 @@ const { body } = require('express-validator')
 
 const adminLoginValidator = [
   body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .bail()
     .isEmail()
     .withMessage('Valid email is required')
     .normalizeEmail(),
+
   body('password')
-    .isLength({ min: 8 })
-    .withMessage('Password must be at least 8 characters')
+    .notEmpty()
+    .withMessage('Password is required')
+    .isStrongPassword({
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1
+    })
+    .withMessage(
+      'Password must contain uppercase, lowercase, number and symbol'
+    )
+]
+
+const verifyOTPValidator = [
+  body('code')
+    .trim()
+    .notEmpty()
+    .withMessage('OTP is required')
+    .bail()
+    .isLength({ min: 6, max: 6 })
+    .withMessage('OTP must be exactly 6 digits')
+    .isNumeric()
+    .withMessage('OTP must contain only digits')
 ]
 
 const changePasswordValidator = [
@@ -30,8 +57,15 @@ const createAdminValidator = [
     .withMessage('Invalid role')
 ]
 
+// module.exports = {
+//   adminLoginValidator,
+//   changePasswordValidator,
+//   createAdminValidator
+// }
+
 module.exports = {
   adminLoginValidator,
+  verifyOTPValidator,
   changePasswordValidator,
   createAdminValidator
 }

@@ -1,5 +1,7 @@
 // server/src/routes/public/analytics.js
 const express = require('express')
+const validateRequest =
+require('../../middleware/validateRequest')
 const PageView = require('../../models/PageView')
 const crypto = require('crypto')
 

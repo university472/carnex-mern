@@ -1,5 +1,6 @@
 // server/src/routes/public/finance.js
 const express = require('express')
+const validateRequest = require('../../middleware/validateRequest')
 const {
   submitFinanceApplication
 } = require('../../controllers/public/financeController')
@@ -10,6 +11,11 @@ const {
 const router = express.Router()
 
 // POST /api/finance
-router.post('/', financeApplicationValidator, submitFinanceApplication)
+router.post(
+  '/',
+  financeApplicationValidator,
+  validateRequest,
+  submitFinanceApplication
+)
 
 module.exports = router

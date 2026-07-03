@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import {  DEALERSHIP } from '../../constants'
-import logo from '../../assets/logo.png'
+import { DEALERSHIP } from '../../constants'
+import logo from '../../assets/logo1.png'
 
 // ── Icons (inline SVG, no dependency needed) ──────────────────
 function PhoneIcon() {
@@ -159,24 +159,6 @@ function PlusIcon() {
   )
 }
 
-function SearchIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  )
-}
-
 // ── Nav links with dropdown support ───────────────────────────
 const MAIN_NAV = [
   { label: 'Home', path: '/' },
@@ -196,7 +178,7 @@ const MAIN_NAV = [
   { label: 'Test Drive', path: '/test-drive' },
   { label: 'Sourcing', path: '/sourcing' },
   { label: 'About', path: '/about' },
-  { label: 'Contact', path: '/contact' }
+  { label: 'Get in Touch', path: '/contact' }
 ]
 
 // ── Dropdown component ─────────────────────────────────────────
@@ -320,8 +302,17 @@ export function Header() {
 
             <span className="text-red-400/40">|</span>
 
-            <a
+            {/* <a
               href={`mailto:${DEALERSHIP.email}`}
+              className="hidden lg:flex items-center gap-1.5 hover:text-white transition-colors"
+            >
+              <MailIcon />
+              <span>{DEALERSHIP.email}</span>
+            </a> */}
+            <a
+              href={`https://mail.google.com/mail/?view=cm&fs=1&to=${DEALERSHIP.email}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="hidden lg:flex items-center gap-1.5 hover:text-white transition-colors"
             >
               <MailIcon />
@@ -337,10 +328,15 @@ export function Header() {
 
             <span className="hidden xl:block text-red-400/40">|</span>
 
-            <span className="hidden xl:flex items-center gap-1.5">
+            <a
+              href="https://maps.google.com/?q=8193+Elder+Creek+Road,+Sacramento,+CA+95824"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden xl:flex items-center gap-1.5 hover:text-white transition-colors"
+            >
               <MapPinIcon />
-              <span>{DEALERSHIP.addressLine2}</span>
-            </span>
+              <span>Sacramento, CA 95824</span>
+            </a>
           </div>
         </div>
       </div>
@@ -352,81 +348,75 @@ export function Header() {
           scrolled ? 'shadow-md' : ''
         ].join(' ')}
       >
-        <div className="max-w-7xl mx-auto px-4 flex items-center h-20 gap-4">
+        {/* <div className="max-w-7xl mx-auto px-4 flex items-center h-20 gap-4"> */}
+        <div className="max-w-7xl mx-auto px-4 flex items-center h-24 gap-4">
           {/* ── Logo ────────────────────────────────────── */}
-          <Link to="/" className="flex items-center flex-shrink-0 mr-3">
+          <Link
+            to="/"
+            className="
+    flex 
+    items-center 
+    flex-shrink-0 
+    mr-8
+  "
+          >
             <img
               src={logo}
               alt="Carnex Auto Sales"
-              className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-105"
+              className="
+      h-[85px]
+      w-auto
+      object-contain
+      transition-transform
+      duration-300
+      hover:scale-105
+      drop-shadow-md
+    "
             />
           </Link>
-
           {/* ── Desktop Nav Links ────────────────────────── */}
-          <div className="hidden lg:flex items-center gap-0.5 flex-1 ml-2">
+          <div className="hidden lg:flex items-center gap-0.5 flex-1 justify-end">
             {MAIN_NAV.map((item) =>
               item.children ? (
                 <NavDropdown key={item.path} item={item} />
               ) : (
+                // <NavLink
+                //   key={item.path}
+                //   to={item.path}
+                //   className={({ isActive }) =>
+                //     `px-3 py-2 text-sm font-medium rounded-md transition-all duration-150 ${
+                //       isActive
+                //         ? 'text-red-600 bg-red-50'
+                //         : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
+                //     }`
+                //   }
+                // >
+                //   {item.label}
+                // </NavLink>
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  className={({ isActive }) =>
-                    `px-3 py-2 text-sm font-medium rounded-md transition-all duration-150 ${
+                  className={({ isActive }) => {
+                    // Special styling for Get in Touch
+                    if (item.label === 'Get in Touch') {
+                      return `ml-2 px-5 py-2 text-sm font-semibold rounded-md transition-all duration-200 shadow-sm ${
+                        isActive
+                          ? 'bg-red-800 text-white'
+                          : 'bg-red-700 text-white hover:bg-red-800'
+                      }`
+                    }
+
+                    return `px-3 py-2 text-sm font-medium rounded-md transition-all duration-150 ${
                       isActive
                         ? 'text-red-600 bg-red-50'
                         : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
                     }`
-                  }
+                  }}
                 >
                   {item.label}
                 </NavLink>
               )
             )}
-          </div>
-
-          {/* ── Desktop Right CTAs ───────────────────────── */}
-          <div className="hidden lg:flex items-center gap-2 ml-auto flex-shrink-0">
-            {/* Search button */}
-            <button
-              type="button"
-              className="w-9 h-9 flex items-center justify-center rounded-md text-gray-500
-                         hover:text-red-600 hover:bg-red-50 transition-colors"
-              aria-label="Search"
-            >
-              <SearchIcon />
-            </button>
-
-            <a
-              href={`tel:${DEALERSHIP.phone}`}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium
-                         text-gray-600 hover:text-red-600 transition-colors"
-            >
-              <PhoneIcon />
-              <span className="hidden xl:inline">{DEALERSHIP.phone}</span>
-            </a>
-
-            <Link
-              to="/contact"
-              className="px-4 py-2 text-sm font-medium text-gray-700
-                         border border-gray-300 rounded-md
-                         hover:border-red-400 hover:text-red-600
-                         transition-all duration-150"
-            >
-              Get in Touch
-            </Link>
-
-            <Link
-              to="/inventory"
-              className="px-4 py-2 text-sm font-semibold text-white
-                         bg-red-700 rounded-md
-                         hover:bg-red-800 active:bg-red-900
-                         transition-all duration-150 shadow-sm
-                         flex items-center gap-1.5"
-            >
-              <PlusIcon />
-              View Inventory
-            </Link>
           </div>
 
           {/* ── Tablet middle nav (md only) ──────────────── */}

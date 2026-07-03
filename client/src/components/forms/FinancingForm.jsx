@@ -1,6 +1,7 @@
 // client/src/components/forms/FinancingForm.jsx
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { ConsentAgreement } from './ConsentAgreement'
 import { fetchVehicles, fetchVehicleById } from '../../services/vehicleService'
 import api from '../../services/api'
 import { Input } from '../ui/Input'
@@ -143,6 +144,7 @@ export function FinancingForm() {
   const [submitted, setSubmitted] = useState(false)
   const [serverError, setServerError] = useState('')
   const [errors, setErrors] = useState({})
+  const [consentAccepted, setConsentAccepted] = useState(false)
   const [form, setForm] = useState({
     ...emptyForm,
     vehicleId: vehicleIdFromQuery || ''
@@ -203,8 +205,9 @@ export function FinancingForm() {
     if (!form.desiredAmount.trim())
       e.desiredAmount = 'Desired loan amount is required.'
     if (!form.desiredTerm) e.desiredTerm = 'Select term length.'
-    if (!form.acceptTerms)
-      e.acceptTerms = 'You must accept the terms to submit.'
+    if (!consentAccepted) {
+      e.consent = 'You must accept the authorization agreement.'
+    }
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -233,10 +236,16 @@ export function FinancingForm() {
         termMonths: form.desiredTerm ? Number(form.desiredTerm) : undefined,
         preferredMonthlyPayment: form.desiredMonthly
           ? Number(form.desiredMonthly)
-          : undefined
+          : undefined,
+        consent: {
+          accepted: true
+        }
       }
       await api.post('/finance', payload)
+
       setSubmitted(true)
+      setForm(emptyForm)
+      setConsentAccepted(false)
     } catch (err) {
       setServerError(
         err?.response?.data?.message ||
@@ -249,12 +258,19 @@ export function FinancingForm() {
 
   if (submitted) {
     return (
-      <div className="card-surface space-y-3 p-5 text-sm">
-        <h2 className="text-section-title text-base">Application received</h2>
-        <p className="text-body-muted">
-          Thank you for submitting your financing request. Our U.S. financing
-          team will review your details and contact you by phone or email with
-          next steps and lender options.
+      <div className="card-surface p-8 text-center space-y-4">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600 text-2xl">
+          ✓
+        </div>
+
+        <h2 className="text-section-title text-xl">
+          Application Submitted Successfully
+        </h2>
+
+        <p className="text-body-muted max-w-xl mx-auto">
+          Thank you for submitting your financing application. Your information
+          has been received successfully. Our team will review your details and
+          contact you shortly.
         </p>
       </div>
     )
@@ -541,31 +557,26 @@ export function FinancingForm() {
           onChange={(e) => updateField('downPayment', e.target.value)}
         />
 
-        <div className="space-y-2 text-xs text-brand-muted">
-          <p>
-            Alimony, child support, or separate maintenance income need not be
-            revealed if you do not wish to have it considered.
-          </p>
-          <label className="inline-flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.acceptTerms}
-              onChange={(e) => updateField('acceptTerms', e.target.checked)}
-            />
-            <span>
-              I confirm the information provided is accurate and authorize
-              Carnex Auto Sales and its U.S. lending partners to review my
-              application.
-            </span>
-          </label>
-          {errors.acceptTerms && (
-            <p className="text-[11px] text-red-600">{errors.acceptTerms}</p>
+        <div className="space-y-3">
+          <h2 className="text-section-title text-base">Authorization</h2>
+
+          <ConsentAgreement
+            checked={consentAccepted}
+            onChange={setConsentAccepted}
+          />
+
+          {errors.consent && (
+            <p className="text-[11px] text-red-600">{errors.consent}</p>
           )}
         </div>
       </section>
 
       <div className="flex justify-end">
-        <Button type="submit" size="md" disabled={submitting}>
+        <Button
+          type="submit"
+          size="md"
+          disabled={submitting || !consentAccepted}
+        >
           {submitting ? 'Submitting…' : 'Submit financing request'}
         </Button>
       </div>

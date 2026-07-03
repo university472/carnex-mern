@@ -1,34 +1,6 @@
-// // server/src/middleware/upload.js
-// const multer = require('multer')
-// const path = require('path')
-// const ApiError = require('../utils/ApiError')
-
-// const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-// const MAX_SIZE_MB = 5
-
-// const storage = multer.memoryStorage() // keep in buffer for Cloudinary streaming
-
-// const fileFilter = (_req, file, cb) => {
-//   if (ALLOWED_TYPES.includes(file.mimetype)) {
-//     cb(null, true)
-//   } else {
-//     cb(
-//       new ApiError(400, `Only ${ALLOWED_TYPES.join(', ')} files are allowed`),
-//       false
-//     )
-//   }
-// }
-
-// const upload = multer({
-//   storage,
-//   fileFilter,
-//   limits: { fileSize: MAX_SIZE_MB * 1024 * 1024 }
-// })
-
-// module.exports = upload
-
 // server/src/middleware/upload.js
 const multer = require('multer')
+const { fileTypeFromBuffer } = require('file-type')
 const cloudinary = require('cloudinary').v2
 const ApiError = require('../utils/ApiError')
 
@@ -67,19 +39,42 @@ const upload = multer({
  * @param {string} folder
  * @returns {Promise<{url: string, publicId: string}>}
  */
-const uploadToCloudinary = (buffer, folder = 'carnex/vehicles') => {
+const uploadToCloudinary = async (buffer, folder = 'carnex/vehicles') => {
+  // FIXED: validate real file signature
+  const type = await fileTypeFromBuffer(buffer)
+
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+
+  if (!type || !allowedTypes.includes(type.mime)) {
+    throw new ApiError(400, 'Invalid image file')
+  }
+
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder,
         resource_type: 'image',
-        transformation: [{ quality: 'auto', fetch_format: 'auto' }]
+
+        transformation: [
+          {
+            quality: 'auto',
+            fetch_format: 'auto'
+          }
+        ]
       },
+
       (error, result) => {
-        if (error) return reject(new ApiError(500, 'Image upload failed'))
-        resolve({ url: result.secure_url, publicId: result.public_id })
+        if (error) {
+          return reject(new ApiError(500, 'Image upload failed'))
+        }
+
+        resolve({
+          url: result.secure_url,
+          publicId: result.public_id
+        })
       }
     )
+
     stream.end(buffer)
   })
 }

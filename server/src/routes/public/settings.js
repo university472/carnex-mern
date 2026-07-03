@@ -1,17 +1,28 @@
 // // server/src/routes/public/settings.js
-// import express from 'express'
-// import { getPublicSettings } from '../../controllers/public/settingsController.js'
+// const express = require('express')
+// const validateRequest = require('../../middleware/validateRequest')
+// const {
+//   getPublicSettings
+// } = require('../../controllers/public/settingsController')
 
 // const router = express.Router()
-
+// router.post(
+//  '/',
+//  validateRequest,
+//  submitContactMessage
+// )
 // // GET /api/settings/public
 // router.get('/public', getPublicSettings)
 
-// export default router
+// module.exports = router
 
 // server/src/routes/public/settings.js
+
 const express = require('express')
-const { getPublicSettings } = require('../../controllers/public/settingsController')
+
+const {
+  getPublicSettings
+} = require('../../controllers/public/settingsController')
 
 const router = express.Router()
 

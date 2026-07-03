@@ -1,6 +1,13 @@
 // server/src/config/nodemailer.js
 const nodemailer = require('nodemailer')
-
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: Number(process.env.SMTP_PORT) || 587,
@@ -32,7 +39,7 @@ const sendOTPEmail = async ({ to, name, code, purpose }) => {
       </div>
       <div style="background:#fff;border:1px solid #e5e7eb;border-top:none;
                   padding:24px;border-radius:0 0 8px 8px">
-        <p style="color:#111827;margin:0 0 8px">Hello <strong>${name}</strong>,</p>
+        <p style="color:#111827;margin:0 0 8px">Hello <strong>${escapeHtml(name)}</strong>,</p>
         <p style="color:#6b7280;font-size:14px;margin:0 0 24px">
           Your <strong>${purposeLabel}</strong> verification code is:
         </p>
@@ -40,7 +47,7 @@ const sendOTPEmail = async ({ to, name, code, purpose }) => {
                     padding:20px;text-align:center;margin:0 0 24px">
           <span style="font-size:36px;font-weight:700;letter-spacing:8px;
                        color:#dc2626;font-family:monospace">
-            ${code}
+            ${escapeHtml(code)}
           </span>
         </div>
         <p style="color:#6b7280;font-size:13px;margin:0 0 8px">

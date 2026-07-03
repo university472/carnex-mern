@@ -277,6 +277,7 @@ const ApiError = require('../../utils/ApiError')
 const ApiResponse = require('../../utils/ApiResponse')
 const generateToken = require('../../utils/generateToken')
 const { sendOTPEmail } = require('../../config/nodemailer')
+const { validationResult } = require('express-validator')
 
 let logAction
 try {
@@ -294,14 +295,13 @@ const createPendingToken = (userId) =>
 // ── POST /api/admin/auth/login ────────────────────────────────
 async function login(req, res, next) {
   try {
-    const { email, password } = req.body
 
-    if (!email || !password) {
-      return next(new ApiError(400, 'Email and password are required'))
-    }
+    const { email = '', password = '' } = req.body  
+
+    const normalizedEmail = email.toLowerCase().trim()
 
     const user = await User.findOne({
-      email: email.toLowerCase().trim()
+      email: normalizedEmail
     }).select('+password')
 
     if (!user || !user.isActive) {
@@ -341,12 +341,15 @@ async function login(req, res, next) {
     // Set a short-lived pending cookie so /verify-otp knows who is verifying
     const pendingToken = createPendingToken(user._id)
 
-    res.cookie('otp_pending', pendingToken, {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      path: '/',
       maxAge: 15 * 60 * 1000
-    })
+    }
+
+    res.cookie('otp_pending', pendingToken, cookieOptions)
 
     return res.json(
       new ApiResponse(
@@ -366,7 +369,7 @@ async function login(req, res, next) {
 // ── POST /api/admin/auth/verify-otp ──────────────────────────
 async function verifyLoginOTP(req, res, next) {
   try {
-    const { code } = req.body
+    const { code = '' } = req.body
 
     if (!code) {
       return next(new ApiError(400, 'OTP code is required'))
@@ -452,8 +455,15 @@ async function verifyLoginOTP(req, res, next) {
 // ── POST /api/admin/auth/logout ───────────────────────────────
 async function logout(req, res, next) {
   try {
-    res.clearCookie('token')
-    res.clearCookie('otp_pending')
+    const clearOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      path: '/'
+    }
+
+    res.clearCookie('token', clearOptions)
+    res.clearCookie('otp_pending', clearOptions)
 
     if (req.admin) {
       await logAction(req.admin, 'ADMIN_LOGOUT', 'user', req.admin.id, {}, req)

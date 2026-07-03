@@ -2,7 +2,7 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 
-const SALT_ROUNDS = 10
+const SALT_ROUNDS = 12
 const MAX_LOGIN_ATTEMPTS = 5
 const LOCK_TIME = 30 * 60 * 1000 // 30 minutes
 
@@ -19,7 +19,8 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
-      trim: true
+      trim: true,
+      match: [/^\S+@\S+\.\S+$/, 'Invalid email format']
     },
     password: {
       type: String,

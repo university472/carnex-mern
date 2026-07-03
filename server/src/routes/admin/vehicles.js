@@ -1,6 +1,7 @@
 // server/src/routes/admin/vehicles.js
 const express = require('express')
 const auth = require('../../middleware/auth')
+const parseVehicleData = require('../../middleware/parseVehicleData')
 const authorize = require('../../middleware/authorize')
 const {
   adminGetVehicles,
@@ -40,22 +41,39 @@ router.get(
   adminGetVehicleById
 )
 
+// router.post(
+//   '/',
+//   authorize('super-admin', 'admin'),
+//   uploadMiddleware,
+//   createVehicleValidator,
+//   adminCreateVehicle
+// )
+
 router.post(
   '/',
   authorize('super-admin', 'admin'),
   uploadMiddleware,
+  parseVehicleData,
   createVehicleValidator,
   adminCreateVehicle
 )
+
+// router.patch(
+//   '/:id',
+//   authorize('super-admin', 'admin'),
+//   uploadMiddleware,
+//   updateVehicleValidator,
+//   adminUpdateVehicle
+// )
 
 router.patch(
   '/:id',
   authorize('super-admin', 'admin'),
   uploadMiddleware,
+  parseVehicleData,
   updateVehicleValidator,
   adminUpdateVehicle
 )
-
 router.patch(
   '/:id/status',
   authorize('super-admin', 'admin'),

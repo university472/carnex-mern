@@ -1,14 +1,10 @@
 // server/src/validators/vehicleValidators.js
 const { body } = require('express-validator')
 
-const createVehicleValidator = [
-  body('title')
-    .isString()
-    .trim()
-    .isLength({ min: 2, max: 180 })
-    .withMessage('Title must be between 2 and 180 characters'),
-  body('make').isString().trim().notEmpty().withMessage('Make is required'),
-  body('model').isString().trim().notEmpty().withMessage('Model is required'),
+exports.createVehicleValidator = [
+  body('title').trim().notEmpty().withMessage('Title is required'),
+  body('make').trim().notEmpty().withMessage('Make is required'),
+  body('model').trim().notEmpty().withMessage('Model is required'),
   body('year')
     .isInt({ min: 1990, max: new Date().getFullYear() + 1 })
     .withMessage('Valid year is required'),
@@ -16,86 +12,137 @@ const createVehicleValidator = [
     .isFloat({ min: 0 })
     .withMessage('Price must be a positive number'),
   body('mileage')
+    .optional({ nullable: true })
+    .isInt({ min: 0 })
+    .withMessage('Mileage must be a non-negative number'),
+  body('condition')
     .optional()
-    .isFloat({ min: 0 })
-    .withMessage('Mileage must be a positive number'),
-  body('status')
+    .isIn(['new', 'used', 'certified'])
+    .withMessage('Condition must be new, used, or certified'),
+  // Custom validation: if condition is 'used', mileage must be >=1
+  body('mileage').custom((value, { req }) => {
+    const condition = req.body.condition || 'used' // default to used
+    if (
+      condition === 'used' &&
+      (value === undefined ||
+        value === null ||
+        value === '' ||
+        Number(value) < 1)
+    ) {
+      throw new Error(
+        'Mileage is required for used vehicles and must be at least 1'
+      )
+    }
+    // For new vehicles, allow missing/empty and later default to 0
+    return true
+  }),
+  body('stockNumber').optional().trim(),
+  body('vin')
     .optional()
-    .isIn(['available', 'reserved', 'sold', 'hidden'])
-    .withMessage('Invalid status value')
+    .trim()
+    .isLength({ min: 17, max: 17 })
+    .withMessage('VIN must be 17 characters'),
+  body('exteriorColor').optional().trim(),
+  body('interiorColor').optional().trim(),
+  body('bodyType')
+    .notEmpty()
+    .withMessage('Body type is required')
+    .isIn([
+      'Sedan',
+      'SUV',
+      'Coupe',
+      'Convertible',
+      'Hatchback',
+      'Wagon',
+      'Pickup Truck',
+      'Van',
+      'Minivan',
+      'Crossover',
+      'Luxury',
+      'Sports Car',
+      'Electric',
+      'Hybrid',
+      'Diesel',
+      'Other'
+    ])
+    .withMessage('Invalid body type'),
+  body('fuelType').optional().trim(),
+  body('transmission').optional().trim(),
+  body('driveType').optional().trim(),
+  body('location').optional().trim(),
+  body('description').optional().trim(),
+  body('dealerNotes').optional().trim(),
+  body('warranty').optional().trim(),
+  body('status').optional().isIn(['available', 'reserved', 'sold', 'hidden']),
+  body('isFeatured').optional().isBoolean(),
+  body('badges.salePrice').optional().isFloat({ min: 0 }),
+  body('badges.discountPrice').optional().isFloat({ min: 0 }),
+  body('media.videoUrl').optional().trim(),
+  body('media.view360Url').optional().trim(),
+  body('media.carfaxUrl').optional().trim()
 ]
 
-const updateVehicleValidator = [
-  body('title')
-    .optional()
-    .isString()
-    .trim()
-    .isLength({ min: 2, max: 180 })
-    .withMessage('Title must be between 2 and 180 characters'),
+exports.updateVehicleValidator = [
+  body('title').optional().trim(),
+  body('make').optional().trim(),
+  body('model').optional().trim(),
   body('year')
     .optional()
-    .isInt({ min: 1990, max: new Date().getFullYear() + 1 })
-    .withMessage('Valid year is required'),
-  body('price')
+    .isInt({ min: 1990, max: new Date().getFullYear() + 1 }),
+  body('price').optional().isFloat({ min: 0 }),
+  body('mileage').optional({ nullable: true }).isInt({ min: 0 }),
+  body('condition').optional().isIn(['new', 'used', 'certified']),
+  body('mileage').custom((value, { req }) => {
+    const condition = req.body.condition || 'used'
+    if (
+      condition === 'used' &&
+      (value === undefined ||
+        value === null ||
+        value === '' ||
+        Number(value) < 1)
+    ) {
+      throw new Error(
+        'Mileage is required for used vehicles and must be at least 1'
+      )
+    }
+    return true
+  }),
+  body('stockNumber').optional().trim(),
+  body('vin').optional().trim(),
+  body('exteriorColor').optional().trim(),
+  body('interiorColor').optional().trim(),
+  body('bodyType')
     .optional()
-    .isFloat({ min: 0 })
-    .withMessage('Price must be a positive number'),
-  body('mileage')
-    .optional()
-    .isFloat({ min: 0 })
-    .withMessage('Mileage must be a positive number'),
-  body('status')
-    .optional()
-    .isIn(['available', 'reserved', 'sold', 'hidden'])
-    .withMessage('Invalid status value')
+    .isIn([
+      'Sedan',
+      'SUV',
+      'Coupe',
+      'Convertible',
+      'Hatchback',
+      'Wagon',
+      'Pickup Truck',
+      'Van',
+      'Minivan',
+      'Crossover',
+      'Luxury',
+      'Sports Car',
+      'Electric',
+      'Hybrid',
+      'Diesel',
+      'Other'
+    ]),
+  body('fuelType').optional().trim(),
+  body('transmission').optional().trim(),
+  body('driveType').optional().trim(),
+  body('location').optional().trim(),
+  body('description').optional().trim(),
+  body('dealerNotes').optional().trim(),
+  body('warranty').optional().trim(),
+  body('status').optional().isIn(['available', 'reserved', 'sold', 'hidden']),
+  body('isFeatured').optional().isBoolean(),
+  body('badges.salePrice').optional().isFloat({ min: 0 }),
+  body('badges.discountPrice').optional().isFloat({ min: 0 }),
+  body('media.videoUrl').optional().trim(),
+  body('media.view360Url').optional().trim(),
+  body('media.carfaxUrl').optional().trim()
 ]
-
-module.exports = { createVehicleValidator, updateVehicleValidator }
-
-// import { query, param } from 'express-validator'
-
-// export const listVehiclesValidator = [
-//   query('make').optional().isString().trim(),
-//   query('model').optional().isString().trim(),
-//   query('category')
-//     .optional()
-//     .isIn([
-//       'sedan',
-//       'suv',
-//       'pickup',
-//       'coupe',
-//       'hatchback',
-//       'convertible',
-//       'van',
-//       'wagon'
-//     ])
-//     .withMessage('Invalid category'),
-//   query('condition')
-//     .optional()
-//     .isIn(['new', 'used', 'certified'])
-//     .withMessage('Invalid condition'),
-//   query('minPrice').optional().isFloat({ min: 0 }),
-//   query('maxPrice').optional().isFloat({ min: 0 }),
-//   query('minMileage').optional().isFloat({ min: 0 }),
-//   query('maxMileage').optional().isFloat({ min: 0 }),
-//   query('minYear').optional().isInt({ min: 1980 }),
-//   query('maxYear').optional().isInt({ min: 1980 }),
-//   query('exteriorColor').optional().isString().trim(),
-//   query('drivetrain').optional().isString().trim(),
-//   query('fuelType').optional().isString().trim(),
-//   query('search').optional().isString().trim().isLength({ min: 2 }),
-//   query('sort')
-//     .optional()
-//     .isIn(['price_asc', 'price_desc', 'year_desc', 'mileage_asc', 'newest'])
-//     .withMessage('Invalid sort option'),
-//   query('page').optional().isInt({ min: 1 }),
-//   query('limit').optional().isInt({ min: 1, max: 60 })
-// ]
-
-// export const slugParamValidator = [
-//   param('slug')
-//     .isString()
-//     .trim()
-//     .notEmpty()
-//     .withMessage('Vehicle slug is required')
-// ]

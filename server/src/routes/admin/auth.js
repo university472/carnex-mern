@@ -1,6 +1,10 @@
 // server/src/routes/admin/auth.js
 const express = require('express')
 const {
+  adminLoginValidator,
+  verifyOTPValidator
+} = require('../../validators/authValidators')
+const {
   login,
   verifyLoginOTP,
   logout,
@@ -13,14 +17,21 @@ const {
   changePassword,
   confirmChangePassword
 } = require('../../controllers/admin/passwordResetController')
+const { authLimiter } = require('../../middleware/rateLimiter')
 const auth = require('../../middleware/auth')
 const authorize = require('../../middleware/authorize')
+const validateRequest = require('../../middleware/validateRequest')
 
 const router = express.Router()
 
 // ── Unauthenticated routes ────────────────────────────────────
-router.post('/login', login)
-router.post('/verify-otp', verifyLoginOTP)
+router.post('/login', adminLoginValidator, validateRequest, login)
+router.post(
+  '/verify-otp',
+  verifyOTPValidator,
+  validateRequest,
+  verifyLoginOTP
+)
 router.post('/forgot-password', forgotPassword)
 router.post('/verify-reset-otp', verifyResetOTP)
 router.post('/reset-password', resetPassword)

@@ -5,8 +5,9 @@ const cors = require('cors')
 const compression = require('compression')
 const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
-const mongoSanitize = require('express-mongo-sanitize')
-const xssClean = require('xss-clean')
+// const mongoSanitize = require('express-mongo-sanitize')
+// const xssClean = require('xss-clean')
+const mongoSanitize = require('./src/middleware/mongoSanitize')
 const hpp = require('hpp')
 
 // ── Admin routes ──────────────────────────────────────────────
@@ -42,9 +43,16 @@ const ApiResponse = require('./src/utils/ApiResponse')
 const { API_PREFIX } = require('./src/config/constants')
 
 const app = express()
+app.set('trust proxy', 1)
 
 // 1) Security headers
-app.use(helmet())
+app.use(
+  helmet({
+    crossOriginResourcePolicy: {
+      policy: 'cross-origin'
+    }
+  })
+)
 
 // 2) CORS
 const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:5173']
@@ -76,6 +84,7 @@ app.use(cookieParser())
 // app.use(mongoSanitize())
 // app.use(xssClean())
 
+app.use(mongoSanitize)
 // 7) HPP
 app.use(hpp({ whitelist: ['sort', 'filters', 'page', 'limit'] }))
 

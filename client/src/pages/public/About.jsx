@@ -84,7 +84,9 @@ export function About() {
             <p>
               <span className="font-medium">Email:</span>{' '}
               <a
-                href={`mailto:${DEALERSHIP.email}`}
+                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${DEALERSHIP.email}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-brand-primary hover:underline"
               >
                 {DEALERSHIP.email}

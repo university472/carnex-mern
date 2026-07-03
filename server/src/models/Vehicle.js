@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 
 const vehicleSchema = new mongoose.Schema(
   {
+    // ---------- Basic Information ----------
     title: {
       type: String,
       required: true,
@@ -20,7 +21,9 @@ const vehicleSchema = new mongoose.Schema(
       trim: true,
       uppercase: true,
       unique: true,
-      sparse: true
+      sparse: true,
+      minlength: 17,
+      maxlength: 17
     },
     make: {
       type: String,
@@ -47,6 +50,11 @@ const vehicleSchema = new mongoose.Schema(
       type: Number,
       min: 0
     },
+    condition: {
+      type: String,
+      enum: ['new', 'used', 'certified'],
+      default: 'used'
+    },
     bodyType: {
       type: String,
       trim: true
@@ -63,7 +71,11 @@ const vehicleSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
-    color: {
+    exteriorColor: {
+      type: String,
+      trim: true
+    },
+    interiorColor: {
       type: String,
       trim: true
     },
@@ -71,6 +83,84 @@ const vehicleSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+
+    // ---------- Specs (nested) ----------
+    specs: {
+      engine: {
+        size: { type: String, trim: true },
+        type: { type: String, trim: true },
+        horsepower: { type: Number },
+        horsepowerRpm: { type: Number },
+        torque: { type: Number },
+        torqueRpm: { type: Number },
+        cylinders: { type: Number },
+        valves: { type: Number },
+        compressionRatio: { type: String, trim: true },
+        fuelSystem: { type: String, trim: true }
+      },
+      transmission: {
+        type: { type: String, trim: true },
+        gears: { type: Number },
+        description: { type: String, trim: true }
+      },
+      fuelEconomy: {
+        cityMpg: { type: Number },
+        highwayMpg: { type: Number },
+        combinedMpg: { type: Number }
+      },
+      dimensions: {
+        length: { type: String, trim: true },
+        width: { type: String, trim: true },
+        height: { type: String, trim: true },
+        wheelbase: { type: String, trim: true },
+        groundClearance: { type: String, trim: true },
+        cargoCapacity: { type: String, trim: true },
+        fuelTankCapacity: { type: String, trim: true }
+      },
+      weight: {
+        curbWeight: { type: String, trim: true },
+        gvwr: { type: String, trim: true },
+        payload: { type: String, trim: true },
+        towingCapacity: { type: String, trim: true }
+      },
+      performance: {
+        zeroToSixty: { type: String, trim: true },
+        topSpeed: { type: String, trim: true }
+      },
+      doors: { type: Number },
+      seating: { type: Number },
+      trim: { type: String, trim: true }
+    },
+
+    // ---------- Features (categorised) ----------
+    features: {
+      comfort: [{ type: String, trim: true }],
+      convenience: [{ type: String, trim: true }],
+      entertainment: [{ type: String, trim: true }],
+      interior: [{ type: String, trim: true }],
+      exterior: [{ type: String, trim: true }],
+      technology: [{ type: String, trim: true }],
+      safety: [{ type: String, trim: true }],
+      driverAssistance: [{ type: String, trim: true }]
+    },
+
+    // ---------- Description & Notes ----------
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 5000
+    },
+    dealerNotes: {
+      type: String,
+      trim: true,
+      maxlength: 5000
+    },
+    warranty: {
+      type: String,
+      trim: true
+    },
+
+    // ---------- Media ----------
     images: [
       {
         url: String,
@@ -82,10 +172,23 @@ const vehicleSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    media: {
+      videoUrl: { type: String, trim: true },
+      view360Url: { type: String, trim: true },
+      carfaxUrl: { type: String, trim: true }
+    },
+
+    // ---------- Pricing & Badges ----------
+    badges: {
+      salePrice: { type: Number },
+      discountPrice: { type: Number }
+    },
     isFeatured: {
       type: Boolean,
       default: false
     },
+
+    // ---------- Status & Visibility ----------
     status: {
       type: String,
       enum: ['available', 'reserved', 'sold', 'hidden'],

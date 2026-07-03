@@ -52,7 +52,14 @@ otpSchema.statics.generateFor = async function (userId, purpose) {
 
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
 
-  await this.create({ userId, purpose, code, expiresAt })
+  const hashedCode = crypto.createHash('sha256').update(code).digest('hex')
+
+  await this.create({
+    userId,
+    purpose,
+    code: hashedCode,
+    expiresAt
+  })
 
   return code
 }
@@ -74,13 +81,18 @@ otpSchema.statics.verifyCode = async function (userId, purpose, code) {
   // Increment attempts
   otp.attempts += 1
 
-  // Block after 5 wrong attempts
-  if (otp.attempts > 5) {
-    await otp.save()
+  // FIXED: remove OTP after too many failed attempts
+  if (otp.attempts >= 5) {
+    await otp.deleteOne()
     return null
   }
 
-  if (otp.code !== String(code).trim()) {
+  const submittedCode = crypto
+    .createHash('sha256')
+    .update(String(code).trim())
+    .digest('hex')
+
+  if (otp.code !== submittedCode) {
     await otp.save()
     return null
   }
