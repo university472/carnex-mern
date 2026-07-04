@@ -20,15 +20,32 @@ export function Footer() {
           <div className="space-y-1 text-sm">
             <p>
               <span className="font-medium">Address:</span>{' '}
-              {DEALERSHIP.addressLine1}, {DEALERSHIP.addressLine2}
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(
+                  `${DEALERSHIP.addressLine1}, ${DEALERSHIP.addressLine2}`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline text-brand-primary"
+              >
+                {DEALERSHIP.addressLine1}, {DEALERSHIP.addressLine2}
+              </a>
             </p>
             <p>
-              <span className="font-medium">Phone:</span> {DEALERSHIP.phone}
+              <span className="font-medium">Phone:</span>{' '}
+              <a
+                href={`tel:${DEALERSHIP.phone}`}
+                className="hover:underline text-brand-primary"
+              >
+                {DEALERSHIP.phone}
+              </a>
             </p>
             <p>
               <span className="font-medium">Email:</span>{' '}
               <a
-                href={`mailto:${DEALERSHIP.email}`}
+                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${DEALERSHIP.email}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hover:underline text-brand-primary"
               >
                 {DEALERSHIP.email}
@@ -81,16 +98,6 @@ export function Footer() {
           <p>
             © {new Date().getFullYear()} {DEALERSHIP.name}. All rights reserved.
           </p>
-
-          {/* <p className="flex gap-4">
-            <span>Excellence in Every Mile.</span>
-            <Link
-              to="/admin/login"
-              className="text-gray-300 transition-colors hover:text-brand-primary"
-            >
-              Admin Login
-            </Link>
-          </p> */}
         </div>
       </div>
     </footer>

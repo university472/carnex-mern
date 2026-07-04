@@ -509,6 +509,7 @@
 
 // client/src/pages/public/Home.jsx
 import { useState } from 'react'
+import { ContactForm } from '../../components/forms/ContactForm'
 import { Link, useNavigate } from 'react-router-dom'
 import { DEALERSHIP, BUSINESS_HOURS } from '../../constants'
 import { Button } from '../../components/ui/Button'
@@ -551,7 +552,7 @@ const STATS = [
   { num: '500+', label: 'Vehicles Sold' },
   { num: '4.9★', label: 'Customer Rating' },
   { num: '100%', label: 'Inspected' },
-  { num: 'In-House', label: 'Financing Available' }
+  { num: 'Trusted', label: 'Reputable Financing' }
 ]
 
 const TRUST_ITEMS = [
@@ -605,6 +606,7 @@ const REVIEWS = [
 
 export function Home() {
   const navigate = useNavigate()
+  const [showContactForm, setShowContactForm] = useState(false)
   const [filters, setFilters] = useState({
     make: '',
     bodyType: '',
@@ -691,8 +693,29 @@ export function Home() {
       <div className="card-surface !rounded-none border-t border-b border-brand-accent/20">
         <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-brand-border/10">
           {STATS.map((s) => (
-            <div key={s.label} className="py-6 px-4 text-center">
-              <div className="text-3xl font-bold text-brand-accent leading-none">
+            <div
+              key={s.label}
+              className="
+    py-6
+    px-6
+    text-center
+    flex
+    flex-col
+    items-center
+    justify-center
+    min-w-0
+  "
+            >
+              <div
+                className="
+    font-bold
+    text-brand-accent
+    leading-none
+    whitespace-nowrap
+    text-3xl
+    xl:text-[2.5rem]
+  "
+              >
                 {s.num}
               </div>
               <div className="mt-1 text-xs font-medium uppercase tracking-widest text-brand-muted">
@@ -953,24 +976,22 @@ export function Home() {
 
         <div className="card-surface overflow-hidden rounded-card">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3121.849206129849!2d-121.4116496!3d38.5141076!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x809ad00305f24255%3A0xc392330a174dbec3!2s8193%20Elder%20Creek%20Rd%2C%20Sacramento%2C%20CA%2095824!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3121.991613756464!2d-121.40416640000001!3d38.51090429999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x809ac547a236add1%3A0xd1f4ba3921d232c!2sCarnex%20Auto%20Sales%20LLC!5e0!3m2!1sen!2s!4v1783188042575!5m2!1sen!2s"
             width="100%"
             height="100%"
             style={{ border: 0 }}
             allowFullScreen=""
             loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+            referrerPolicy="strict-origin-when-cross-origin"
             className="w-full h-64 sm:h-80"
-            title="Carnex Auto Sales location"
+            title="Carnex Auto Sales LLC location"
           ></iframe>
         </div>
 
         <div className="flex items-center gap-2 text-sm text-brand-muted">
           <span className="text-brand-accent">📍</span>
           <a
-            href={`https://maps.google.com/?q=${encodeURIComponent(
-              `${DEALERSHIP.addressLine1} ${DEALERSHIP.addressLine2}`
-            )}`}
+            href="https://maps.app.goo.gl/oKgPzwuNp92o5LXv9?g_st=aw"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-brand-primary underline underline-offset-2"
@@ -978,6 +999,17 @@ export function Home() {
             {DEALERSHIP.addressLine1}, {DEALERSHIP.addressLine2}
           </a>
         </div>
+        <div className="pt-3">
+          <Button onClick={() => setShowContactForm((prev) => !prev)}>
+            Contact Us
+          </Button>
+        </div>
+
+        {showContactForm && (
+          <div className="card-surface p-5 mt-4">
+            <ContactForm />
+          </div>
+        )}
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════

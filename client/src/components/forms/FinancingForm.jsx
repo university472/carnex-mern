@@ -104,33 +104,93 @@ const termOptions = [
 
 const emptyForm = {
   vehicleId: '',
+
+  // Vehicle
   vehiclePrice: '',
   vehicleMileage: '',
+  vehicleVin: '',
+  vehicleYear: '',
+  vehicleMake: '',
+  vehicleModel: '',
+
+  // Trade In
+  tradeVin: '',
+  tradeYear: '',
+  tradeMake: '',
+  tradeModel: '',
+  tradeMileage: '',
   firstName: '',
+  middleName: '',
   lastName: '',
   phone: '',
   phoneType: '',
   email: '',
-  ssnLast4: '',
+  ssn: '',
   birthdate: '',
+
   driversLicenseNumber: '',
   driversLicenseState: 'CA',
+  driversLicenseIssueDate: '',
+  driversLicenseExpiryDate: '',
+  driversLicenseCounty: '',
   residenceType: '',
   monthlyHousing: '',
   yearsAtResidence: '',
+  monthsAtResidence: '',
+
+  streetAddress: '',
+  address2: '',
+
   city: '',
   state: 'CA',
   zip: '',
+
+  // Previous Address
+
+  previousResidenceType: '',
+  previousMonthlyHousing: '',
+  previousYears: '',
+  previousMonths: '',
+
+  previousStreet: '',
+  previousAddress2: '',
+
+  previousCity: '',
+  previousState: 'CA',
+  previousZip: '',
   employmentStatus: '',
+
   employer: '',
   jobTitle: '',
+  employerPhone: '',
+
   income: '',
   incomeInterval: '',
+
   yearsAtJob: '',
+  monthsAtJob: '',
+
+  otherIncome: '',
   desiredAmount: '',
   desiredTerm: '60',
   desiredMonthly: '',
   downPayment: '',
+  // Co Buyer
+
+  coFirstName: '',
+  coMiddleName: '',
+  coLastName: '',
+
+  coPhone: '',
+  coPhoneType: '',
+
+  coEmail: '',
+
+  coSSN: '',
+  coBirthdate: '',
+
+  coRelationship: '',
+
   acceptTerms: false
 }
 
@@ -164,9 +224,20 @@ export function FinancingForm() {
           setSelectedVehicle(v)
           setForm((prev) => ({
             ...prev,
+
             vehicleId: v._id,
+
             vehiclePrice: v.price?.toString() || '',
-            vehicleMileage: v.mileage?.toString() || ''
+
+            vehicleMileage: v.mileage?.toString() || '',
+
+            vehicleVin: v.vin || '',
+
+            vehicleYear: v.year || '',
+
+            vehicleMake: v.make || '',
+
+            vehicleModel: v.model || ''
           }))
         }
       })
@@ -181,9 +252,20 @@ export function FinancingForm() {
         setSelectedVehicle(v)
         setForm((prev) => ({
           ...prev,
+
           vehicleId: value,
+
           vehiclePrice: v.price?.toString() || '',
-          vehicleMileage: v.mileage?.toString() || ''
+
+          vehicleMileage: v.mileage?.toString() || '',
+
+          vehicleVin: v.vin || '',
+
+          vehicleYear: v.year || '',
+
+          vehicleMake: v.make || '',
+
+          vehicleModel: v.model || ''
         }))
       }
     }
@@ -221,22 +303,133 @@ export function FinancingForm() {
     try {
       const payload = {
         firstName: form.firstName,
+        middleName: form.middleName || undefined,
         lastName: form.lastName,
         email: form.email,
         phone: form.phone,
-        city: form.city,
-        state: form.state,
-        postalCode: form.zip,
-        employerName: form.employer,
-        employmentStatus: form.employmentStatus,
-        monthlyIncome: form.income ? Number(form.income) : undefined,
+        phoneType: form.phoneType,
+
+        ssn: form.ssn,
+
+        birthdate: form.birthdate,
+
+        driversLicense: {
+          number: form.driversLicenseNumber,
+
+          state: form.driversLicenseState,
+
+          issueDate: form.driversLicenseIssueDate,
+
+          expiryDate: form.driversLicenseExpiryDate,
+
+          county: form.driversLicenseCounty
+        },
+        address: {
+          residenceType: form.residenceType,
+          monthlyPayment: Number(form.monthlyHousing),
+          years: Number(form.yearsAtResidence),
+          months: Number(form.monthsAtResidence),
+
+          street: form.streetAddress,
+          address2: form.address2,
+
+          city: form.city,
+          state: form.state,
+          zip: form.zip
+        },
+
+        previousAddress: {
+          residenceType: form.previousResidenceType,
+
+          monthlyPayment: Number(form.previousMonthlyHousing),
+
+          years: Number(form.previousYears),
+
+          months: Number(form.previousMonths),
+
+          street: form.previousStreet,
+
+          address2: form.previousAddress2,
+
+          city: form.previousCity,
+
+          state: form.previousState,
+
+          zip: form.previousZip
+        },
+
+        employment: {
+          status: form.employmentStatus,
+
+          employer: form.employer,
+
+          jobTitle: form.jobTitle,
+
+          employerPhone: form.employerPhone,
+
+          income: Number(form.income),
+
+          incomeInterval: form.incomeInterval,
+
+          years: Number(form.yearsAtJob),
+
+          months: Number(form.monthsAtJob),
+
+          otherIncome: Number(form.otherIncome)
+        },
         vehicleId: form.vehicleId || undefined,
         vehiclePrice: form.vehiclePrice ? Number(form.vehiclePrice) : undefined,
+        vehicleMileage: Number(form.vehicleMileage),
+
+        vehicle: {
+          vin: form.vehicleVin,
+
+          year: Number(form.vehicleYear),
+
+          make: form.vehicleMake,
+
+          model: form.vehicleModel
+        },
+
+        tradeIn: {
+          vin: form.tradeVin,
+
+          year: Number(form.tradeYear),
+
+          make: form.tradeMake,
+
+          model: form.tradeModel,
+
+          mileage: Number(form.tradeMileage)
+        },
+        desiredAmount: form.desiredAmount
+          ? Number(form.desiredAmount)
+          : undefined,
         downPayment: form.downPayment ? Number(form.downPayment) : undefined,
         termMonths: form.desiredTerm ? Number(form.desiredTerm) : undefined,
         preferredMonthlyPayment: form.desiredMonthly
           ? Number(form.desiredMonthly)
           : undefined,
+        coBuyer: {
+          firstName: form.coFirstName,
+
+          middleName: form.coMiddleName,
+
+          lastName: form.coLastName,
+
+          phone: form.coPhone,
+
+          phoneType: form.coPhoneType,
+
+          email: form.coEmail,
+
+          ssn: form.coSSN,
+
+          birthdate: form.coBirthdate,
+
+          relationship: form.coRelationship
+        },
+
         consent: {
           accepted: true
         }
@@ -326,6 +519,73 @@ export function FinancingForm() {
             value={form.vehicleMileage}
             onChange={(e) => updateField('vehicleMileage', e.target.value)}
           />
+          {/* STEP 10: Already present in original code */}
+          <Input
+            id="vf-vin"
+            label="VIN"
+            value={form.vehicleVin}
+            onChange={(e) => updateField('vehicleVin', e.target.value)}
+          />
+
+          <Input
+            id="vf-year"
+            label="Year"
+            type="number"
+            value={form.vehicleYear}
+            onChange={(e) => updateField('vehicleYear', e.target.value)}
+          />
+
+          <Input
+            id="vf-make"
+            label="Make"
+            value={form.vehicleMake}
+            onChange={(e) => updateField('vehicleMake', e.target.value)}
+          />
+
+          <Input
+            id="vf-model"
+            label="Model"
+            value={form.vehicleModel}
+            onChange={(e) => updateField('vehicleModel', e.target.value)}
+          />
+        </div>
+      </section>
+
+      {/* STEP 11: Trade-In section */}
+      <section className="space-y-3">
+        <h2 className="text-section-title text-base">Trade-In Vehicle</h2>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Input
+            label="Trade VIN"
+            value={form.tradeVin}
+            onChange={(e) => updateField('tradeVin', e.target.value)}
+          />
+
+          <Input
+            label="Trade Year"
+            type="number"
+            value={form.tradeYear}
+            onChange={(e) => updateField('tradeYear', e.target.value)}
+          />
+
+          <Input
+            label="Trade Make"
+            value={form.tradeMake}
+            onChange={(e) => updateField('tradeMake', e.target.value)}
+          />
+
+          <Input
+            label="Trade Model"
+            value={form.tradeModel}
+            onChange={(e) => updateField('tradeModel', e.target.value)}
+          />
+
+          <Input
+            label="Trade Mileage"
+            type="number"
+            value={form.tradeMileage}
+            onChange={(e) => updateField('tradeMileage', e.target.value)}
+          />
         </div>
       </section>
 
@@ -341,6 +601,12 @@ export function FinancingForm() {
             value={form.firstName}
             onChange={(e) => updateField('firstName', e.target.value)}
             error={errors.firstName}
+          />
+          <Input
+            id="vf-middleName"
+            label="Middle name (optional)"
+            value={form.middleName}
+            onChange={(e) => updateField('middleName', e.target.value)}
           />
           <Input
             id="vf-lastName"
@@ -383,14 +649,13 @@ export function FinancingForm() {
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
+          {/* STEP 12: Replace SSN input */}
           <Input
             id="vf-ssn"
-            label="SSN last 4 digits"
+            label="Social Security Number"
             type="text"
-            maxLength={4}
-            value={form.ssnLast4}
-            onChange={(e) => updateField('ssnLast4', e.target.value)}
-            helperText="For pre‑qualification only."
+            value={form.ssn}
+            onChange={(e) => updateField('ssn', e.target.value)}
           />
           <Input
             id="vf-dl"
@@ -406,6 +671,30 @@ export function FinancingForm() {
             options={stateOptions}
             value={form.driversLicenseState}
             onChange={(e) => updateField('driversLicenseState', e.target.value)}
+          />
+          {/* STEP 13: License dates and county */}
+          <Input
+            label="License Issue Date"
+            type="date"
+            value={form.driversLicenseIssueDate}
+            onChange={(e) =>
+              updateField('driversLicenseIssueDate', e.target.value)
+            }
+          />
+          <Input
+            label="License Expiry Date"
+            type="date"
+            value={form.driversLicenseExpiryDate}
+            onChange={(e) =>
+              updateField('driversLicenseExpiryDate', e.target.value)
+            }
+          />
+          <Input
+            label="License County"
+            value={form.driversLicenseCounty}
+            onChange={(e) =>
+              updateField('driversLicenseCounty', e.target.value)
+            }
           />
         </div>
       </section>
@@ -437,6 +726,23 @@ export function FinancingForm() {
             value={form.yearsAtResidence}
             onChange={(e) => updateField('yearsAtResidence', e.target.value)}
           />
+          {/* STEP 14: Add missing address fields */}
+          <Input
+            label="Months at residence"
+            type="number"
+            value={form.monthsAtResidence}
+            onChange={(e) => updateField('monthsAtResidence', e.target.value)}
+          />
+          <Input
+            label="Street Address"
+            value={form.streetAddress}
+            onChange={(e) => updateField('streetAddress', e.target.value)}
+          />
+          <Input
+            label="Address 2"
+            value={form.address2}
+            onChange={(e) => updateField('address2', e.target.value)}
+          />
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
           <Input
@@ -460,6 +766,65 @@ export function FinancingForm() {
             value={form.zip}
             onChange={(e) => updateField('zip', e.target.value)}
             error={errors.zip}
+          />
+        </div>
+      </section>
+
+      {/* STEP 15: Previous Address section */}
+      <section className="space-y-3">
+        <h2 className="text-section-title text-base">Previous Address</h2>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Select
+            label="Residence Type"
+            options={residenceTypeOptions}
+            value={form.previousResidenceType}
+            onChange={(e) =>
+              updateField('previousResidenceType', e.target.value)
+            }
+          />
+
+          <Input
+            label="Monthly Rent"
+            type="number"
+            value={form.previousMonthlyHousing}
+            onChange={(e) =>
+              updateField('previousMonthlyHousing', e.target.value)
+            }
+          />
+
+          <Input
+            label="Years"
+            type="number"
+            value={form.previousYears}
+            onChange={(e) => updateField('previousYears', e.target.value)}
+          />
+
+          <Input
+            label="Months"
+            type="number"
+            value={form.previousMonths}
+            onChange={(e) => updateField('previousMonths', e.target.value)}
+          />
+          <Input
+            label="Previous Street"
+            value={form.previousStreet}
+            onChange={(e) => updateField('previousStreet', e.target.value)}
+          />
+          <Input
+            label="Previous City"
+            value={form.previousCity}
+            onChange={(e) => updateField('previousCity', e.target.value)}
+          />
+          <Select
+            label="Previous State"
+            options={stateOptions}
+            value={form.previousState}
+            onChange={(e) => updateField('previousState', e.target.value)}
+          />
+          <Input
+            label="Previous ZIP"
+            value={form.previousZip}
+            onChange={(e) => updateField('previousZip', e.target.value)}
           />
         </div>
       </section>
@@ -514,6 +879,81 @@ export function FinancingForm() {
             min="0"
             value={form.yearsAtJob}
             onChange={(e) => updateField('yearsAtJob', e.target.value)}
+          />
+          {/* STEP 16: Add employment missing fields */}
+          <Input
+            label="Months at job"
+            type="number"
+            value={form.monthsAtJob}
+            onChange={(e) => updateField('monthsAtJob', e.target.value)}
+          />
+          <Input
+            label="Employer Phone"
+            value={form.employerPhone}
+            onChange={(e) => updateField('employerPhone', e.target.value)}
+          />
+          <Input
+            label="Other Monthly Income"
+            type="number"
+            value={form.otherIncome}
+            onChange={(e) => updateField('otherIncome', e.target.value)}
+          />
+        </div>
+      </section>
+
+      {/* STEP 17: Co Buyer section */}
+      <section className="space-y-3">
+        <h2 className="text-section-title text-base">Co Buyer Information</h2>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Input
+            label="First Name"
+            value={form.coFirstName}
+            onChange={(e) => updateField('coFirstName', e.target.value)}
+          />
+          <Input
+            label="Last Name"
+            value={form.coLastName}
+            onChange={(e) => updateField('coLastName', e.target.value)}
+          />
+          <Input
+            label="Phone"
+            value={form.coPhone}
+            onChange={(e) => updateField('coPhone', e.target.value)}
+          />
+          <Input
+            label="Middle Name"
+            value={form.coMiddleName}
+            onChange={(e) => updateField('coMiddleName', e.target.value)}
+          />
+
+          <Select
+            label="Phone Type"
+            options={phoneTypeOptions}
+            value={form.coPhoneType}
+            onChange={(e) => updateField('coPhoneType', e.target.value)}
+          />
+
+          <Input
+            label="SSN"
+            value={form.coSSN}
+            onChange={(e) => updateField('coSSN', e.target.value)}
+          />
+
+          <Input
+            label="Date of Birth"
+            type="date"
+            value={form.coBirthdate}
+            onChange={(e) => updateField('coBirthdate', e.target.value)}
+          />
+          <Input
+            label="Email"
+            value={form.coEmail}
+            onChange={(e) => updateField('coEmail', e.target.value)}
+          />
+          <Input
+            label="Relationship"
+            value={form.coRelationship}
+            onChange={(e) => updateField('coRelationship', e.target.value)}
           />
         </div>
       </section>

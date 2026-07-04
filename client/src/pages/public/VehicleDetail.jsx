@@ -1191,6 +1191,7 @@ const Card = ({ children, className = '' }) => (
 )
 
 export function VehicleDetail() {
+  const [showContactForm, setShowContactForm] = useState(false)
   const { id } = useParams()
   const { vehicle, loading, error } = useVehicleById(id)
   const { vehicles: latestVehicles, loading: relatedLoading } =

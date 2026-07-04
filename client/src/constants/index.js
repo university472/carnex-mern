@@ -13,9 +13,9 @@ export const DEALERSHIP = {
   name: 'Carnex Auto Sales LLC',
   tagline: 'Excellence in Every Mile',
   phone: '(916) 534-0971',
-  email: 'carnexautosales@gmail.com',
-  addressLine1: '8193 Elder Creek Road',
-  addressLine2: 'Sacramento, CA 95824'
+  email: 'info@carnexautos.com',
+  addressLine1: '8193 Elder Creek Rd',
+  addressLine2: 'Sacramento, CA 95824, USA'
 }
 
 export const BUSINESS_HOURS = [
@@ -25,7 +25,7 @@ export const BUSINESS_HOURS = [
   { day: 'Thursday', hours: '9:00 AM – 5:00 PM' },
   { day: 'Friday', hours: '9:00 AM – 5:00 PM' },
   { day: 'Saturday', hours: '9:00 AM – 5:00 PM' },
-  { day: 'Sunday', hours: 'Closed' }
+  { day: 'Sunday', hours: '9:00 AM – 2:00 PM' }
 ]
 
 export const VEHICLE_FILTERS = {

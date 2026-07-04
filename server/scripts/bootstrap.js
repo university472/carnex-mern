@@ -20,7 +20,7 @@
 //         await Settings.create({
 //           dealershipName: 'Carnex Auto Sales LLC',
 //           phone: '(916) 534-0971',
-//           email: 'carnexautosales@gmail.com',
+//           email: 'info@carnexautos.com',
 //           address: '8193 Elder Creek Road, Sacramento, CA 95824'
 //         })
 //         console.log('✅ Default settings seeded.')
@@ -80,7 +80,7 @@ const { connectDB } = require('../src/config/db')
       await Settings.create({
         dealershipName: 'Carnex Auto Sales LLC',
         phone: '(916) 534-0971',
-        email: 'carnexautosales@gmail.com',
+        email: 'info@carnexautos.com',
         address: '8193 Elder Creek Road, Sacramento, CA 95824',
         businessHours: [
           { day: 'Monday', open: '9:00 AM', close: '5:00 PM', closed: false },

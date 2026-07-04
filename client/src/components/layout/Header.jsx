@@ -212,8 +212,8 @@ function NavDropdown({ item, onClose }) {
         className={[
           'flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md transition-all duration-150',
           isActive
-            ? 'text-red-600 bg-red-50'
-            : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
+            ? 'text-brand-primary bg-brand-primary/10'
+            : 'text-gray-700 hover:text-brand-primary hover:bg-brand-primary/10'
         ].join(' ')}
       >
         {item.label}
@@ -238,7 +238,7 @@ function NavDropdown({ item, onClose }) {
                 onClose?.()
               }}
               className="block px-4 py-2.5 text-sm text-gray-600
-                         hover:text-red-600 hover:bg-red-50
+                         hover:text-brand-primary hover:bg-brand-primary/10
                          transition-colors duration-150"
             >
               {child.label}
@@ -280,7 +280,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50">
       {/* ── Top Info Bar (PakWheels style dark red) ──────── */}
-      <div className="hidden md:block bg-[#8B0000]">
+      <div className="hidden md:block bg-brand-primary">
         <div className="max-w-7xl mx-auto px-4 h-9 flex items-center justify-between text-xs">
           {/* Left — tagline */}
           <span className="flex items-center gap-1.5 text-red-200">
@@ -386,8 +386,8 @@ export function Header() {
                 //   className={({ isActive }) =>
                 //     `px-3 py-2 text-sm font-medium rounded-md transition-all duration-150 ${
                 //       isActive
-                //         ? 'text-red-600 bg-red-50'
-                //         : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
+                //         ? 'text-brand-primary bg-red-50'
+                //         : 'text-gray-700 hover:text-brand-primary hover:bg-red-50'
                 //     }`
                 //   }
                 // >
@@ -401,15 +401,15 @@ export function Header() {
                     if (item.label === 'Get in Touch') {
                       return `ml-2 px-5 py-2 text-sm font-semibold rounded-md transition-all duration-200 shadow-sm ${
                         isActive
-                          ? 'bg-red-800 text-white'
-                          : 'bg-red-700 text-white hover:bg-red-800'
+                          ? 'bg-brand-primaryHover text-white'
+                          : 'bg-red-700 text-white hover:bg-brand-primaryHover'
                       }`
                     }
 
                     return `px-3 py-2 text-sm font-medium rounded-md transition-all duration-150 ${
                       isActive
-                        ? 'text-red-600 bg-red-50'
-                        : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
+                        ? 'text-brand-primary bg-brand-primary/10'
+                        : 'text-gray-700 hover:text-brand-primary hover:bg-brand-primary/10'
                     }`
                   }}
                 >
@@ -428,8 +428,8 @@ export function Header() {
                 className={({ isActive }) =>
                   `px-2.5 py-2 text-xs font-medium rounded-md flex-shrink-0 transition-all duration-150 ${
                     isActive
-                      ? 'text-red-600 bg-red-50'
-                      : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+                      ? 'text-brand-primary bg-brand-primary/10'
+                      : 'text-gray-600 hover:text-brand-primary hover:bg-brand-primary/10'
                   }`
                 }
               >
@@ -444,7 +444,7 @@ export function Header() {
               to="/inventory"
               className="px-3 py-1.5 text-xs font-semibold text-white
                          bg-red-700 rounded-md
-                         hover:bg-red-800 transition-colors
+                         hover:bg-brand-primaryHover transition-colors
                          flex items-center gap-1"
             >
               <PlusIcon />
@@ -471,7 +471,7 @@ export function Header() {
               to="/inventory"
               className="px-3 py-1.5 text-xs font-semibold text-white
                          bg-red-700 rounded-md
-                         hover:bg-red-800 transition-colors
+                         hover:bg-brand-primaryHover transition-colors
                          flex items-center gap-1 flex-shrink-0"
             >
               <PlusIcon />
@@ -525,8 +525,8 @@ export function Header() {
                        rounded-md transition-colors duration-150
                        ${
                          isActive
-                           ? 'bg-red-50 text-red-700'
-                           : 'text-gray-700 hover:bg-gray-50 hover:text-red-600'
+                           ? 'bg-brand-primary/10 text-brand-primary'
+                           : 'text-gray-700 hover:bg-brand-primary/10 hover:text-brand-primary'
                        }`
                     }
                   >
@@ -547,7 +547,7 @@ export function Header() {
                           to={child.path}
                           onClick={() => setMobileOpen(false)}
                           className="block px-4 py-2.5 text-sm text-gray-600
-                                     hover:text-red-600 hover:bg-red-50
+                                     hover:text-brand-primary hover:bg-brand-primary/10
                                      rounded-md transition-colors duration-150"
                         >
                           {child.label}
@@ -566,7 +566,7 @@ export function Header() {
                 onClick={() => setMobileOpen(false)}
                 className="w-full py-3 text-sm font-semibold text-white
                            bg-red-700 rounded-md
-                           hover:bg-red-800 transition-colors
+                           hover:bg-brand-primaryHover transition-colors
                            flex items-center justify-center gap-2"
               >
                 <PlusIcon />
@@ -577,7 +577,7 @@ export function Header() {
                 onClick={() => setMobileOpen(false)}
                 className="w-full py-3 text-sm font-medium text-gray-700
                            border border-gray-300 rounded-md
-                           hover:border-red-400 hover:text-red-600
+                           hover:border-brand-primary hover:text-brand-primary
                            transition-all duration-150
                            flex items-center justify-center"
               >
@@ -587,7 +587,7 @@ export function Header() {
                 href={`tel:${DEALERSHIP.phone}`}
                 className="w-full py-3 text-sm font-medium text-gray-600
                            bg-gray-50 rounded-md
-                           hover:bg-gray-100 hover:text-red-600
+                           hover:bg-gray-100 hover:text-brand-primary
                            transition-colors
                            flex items-center justify-center gap-2"
               >

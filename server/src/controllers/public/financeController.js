@@ -35,6 +35,8 @@
 
 // module.exports = { submitFinanceApplication }
 
+
+//server/src/controllers/public/financeController.js
 const FinanceApplication = require('../../models/FinanceApplication')
 const ApiError = require('../../utils/ApiError')
 const ApiResponse = require('../../utils/ApiResponse')

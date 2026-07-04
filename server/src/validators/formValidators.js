@@ -182,32 +182,108 @@ const contactMessageValidator = [
 
 // Finance application
 const financeApplicationValidator = [
+  // Applicant
+
   body('firstName')
     .isString()
     .trim()
     .escape()
     .isLength({ min: 2, max: 80 })
     .withMessage('First name is required'),
+
+  body('middleName').optional({ checkFalsy: true }).isString().trim().escape(),
+
   body('lastName')
     .isString()
     .trim()
     .escape()
     .isLength({ min: 2, max: 80 })
     .withMessage('Last name is required'),
+
   emailField,
+
   phoneField,
-  body('monthlyIncome')
-    .optional()
-    .isFloat({ min: 0 })
-    .withMessage('Monthly income must be a positive number'),
-  body('vehiclePrice')
-    .optional()
-    .isFloat({ min: 0 })
-    .withMessage('Vehicle price must be a positive number'),
-  body('termMonths')
-    .optional()
-    .isInt({ min: 12, max: 96 })
-    .withMessage('Term must be between 12 and 96 months'),
+
+  body('phoneType').optional().isString().trim().escape(),
+
+  body('ssn').optional().isString().trim(),
+
+  body('birthdate').optional({ checkFalsy: true }).isISO8601().toDate(),
+
+  // Driver License
+
+  body('driversLicense.number').optional().isString().trim(),
+
+  body('driversLicense.state').optional().isString().trim(),
+
+  body('driversLicense.issueDate').optional({ checkFalsy: true }).isISO8601(),
+
+  body('driversLicense.expiryDate').optional({ checkFalsy: true }).isISO8601(),
+
+  body('driversLicense.county').optional().isString().trim(),
+
+  // Vehicle
+
+  body('vehiclePrice').optional().isFloat({ min: 0 }),
+
+  body('vehicleMileage').optional().isFloat({ min: 0 }),
+
+  body('vehicle.vin').optional().isString().trim(),
+
+  body('vehicle.year').optional().isInt({ min: 1980 }),
+
+  body('vehicle.make').optional().isString().trim(),
+
+  body('vehicle.model').optional().isString().trim(),
+
+  // Trade In
+
+  body('tradeIn.year').optional().isInt({ min: 1980 }),
+
+  body('tradeIn.mileage').optional().isFloat({ min: 0 }),
+
+  // Address
+
+  body('address.monthlyPayment').optional().isFloat({ min: 0 }),
+
+  body('address.years').optional().isInt({ min: 0 }),
+
+  body('address.months').optional().isInt({ min: 0 }),
+
+  // Previous Address
+
+  body('previousAddress.years').optional().isInt({ min: 0 }),
+
+  body('previousAddress.months').optional().isInt({ min: 0 }),
+
+  // Employment
+
+  body('employment.income').optional().isFloat({ min: 0 }),
+
+  body('employment.years').optional().isInt({ min: 0 }),
+
+  body('employment.months').optional().isInt({ min: 0 }),
+
+  body('employment.otherIncome').optional().isFloat({ min: 0 }),
+
+  // Loan
+
+  body('desiredAmount').optional().isFloat({ min: 0 }),
+
+  body('downPayment').optional().isFloat({ min: 0 }),
+
+  body('termMonths').optional().isInt({ min: 12, max: 96 }),
+
+  body('preferredMonthlyPayment').optional().isFloat({ min: 0 }),
+
+  // Co Buyer
+
+  body('coBuyer.email').optional({ checkFalsy: true }).isEmail(),
+
+  body('coBuyer.phone').optional().isString().trim(),
+
+  body('coBuyer.birthdate').optional({ checkFalsy: true }).isISO8601(),
+
   ...consentValidator
 ]
 
