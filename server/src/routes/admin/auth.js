@@ -1,5 +1,6 @@
 // server/src/routes/admin/auth.js
 const express = require('express')
+const { authLimiter } = require('../../middleware/rateLimiter')
 const {
   adminLoginValidator,
   verifyOTPValidator
@@ -25,9 +26,12 @@ const validateRequest = require('../../middleware/validateRequest')
 const router = express.Router()
 
 // ── Unauthenticated routes ────────────────────────────────────
-router.post('/login', adminLoginValidator, validateRequest, login)
+// router.post('/login', adminLoginValidator, validateRequest, login)
+router.post('/login', authLimiter, adminLoginValidator, validateRequest, login)
+// router.post('/verify-otp', verifyOTPValidator, validateRequest, verifyLoginOTP)
 router.post(
   '/verify-otp',
+  authLimiter,
   verifyOTPValidator,
   validateRequest,
   verifyLoginOTP

@@ -94,7 +94,8 @@ app.get(`${API_PREFIX}/health`, (_req, res) => {
 })
 
 // ── 9) Admin routes ───────────────────────────────────────────
-app.use(`${API_PREFIX}/admin/auth`, authLimiter, adminAuthRoutes)
+// app.use(`${API_PREFIX}/admin/auth`, authLimiter, adminAuthRoutes)
+app.use(`${API_PREFIX}/admin/auth`, adminAuthRoutes)
 app.use(`${API_PREFIX}/admin/leads`, adminLeadRoutes)
 app.use(`${API_PREFIX}/admin/vehicles`, adminVehicleRoutes)
 app.use(`${API_PREFIX}/admin/users`, adminUserRoutes)
