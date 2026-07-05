@@ -24,7 +24,11 @@ export function ProtectedRoute() {
   // No valid session → redirect to login
   if (!isAuthenticated) {
     return (
-      <Navigate to="/admin/login" replace state={{ from: location.pathname }} />
+      <Navigate
+        to="/dealer-panel/login"
+        replace
+        state={{ from: location.pathname }}
+      />
     )
   }
 

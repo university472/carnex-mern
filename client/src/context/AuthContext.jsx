@@ -1,4 +1,5 @@
 // client/src/context/AuthContext.jsx
+
 import {
   createContext,
   useContext,
@@ -6,6 +7,7 @@ import {
   useState,
   useCallback
 } from 'react'
+
 import api, { getToken, setToken, clearToken } from '../services/api'
 
 const AuthContext = createContext({
@@ -17,18 +19,18 @@ const AuthContext = createContext({
 })
 
 export function AuthProvider({ children }) {
+
+
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  /**
-   * Verify token with backend on every app load / tab focus.
-   * sessionStorage is empty on new tab/session → no token → not authenticated.
-   */
+  // ==========================
+  // verify existing token
+  // ==========================
   const verifyToken = useCallback(async () => {
-    const token = getToken() // reads from sessionStorage
+    const token = getToken()
 
     if (!token) {
-      // No token in this session → force login
       setUser(null)
       setLoading(false)
       return
@@ -36,15 +38,17 @@ export function AuthProvider({ children }) {
 
     try {
       const { data } = await api.get('/admin/auth/me')
+
       const payload = data?.data || data
+
       setUser({
         id: payload.id || payload._id,
         name: payload.name,
         email: payload.email,
         role: payload.role
       })
-    } catch {
-      // Token invalid or expired → clear and force login
+    } catch (err) {
+      console.error('Token verification error:', err)
       clearToken()
       setUser(null)
     } finally {
@@ -52,19 +56,14 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  // Verify on every app mount
-  useEffect(() => {
-    verifyToken()
-  }, [verifyToken])
-
-  /**
-   * Called after successful OTP verification.
-   * Stores token in sessionStorage only — dies with the tab.
-   */
+  // ==========================
+  // login after OTP
+  // ==========================
   const login = useCallback((payload) => {
     if (payload?.token) {
-      setToken(payload.token) // sessionStorage — not localStorage
+      setToken(payload.token)
     }
+
     setUser({
       id: payload?.id || payload?._id,
       name: payload?.name,
@@ -73,20 +72,32 @@ export function AuthProvider({ children }) {
     })
   }, [])
 
-  /**
-   * Sign out — clears session token and user state.
-   * Also tells backend to clear httpOnly cookies.
-   */
+  // ==========================
+  // logout
+  // ==========================
   const logout = useCallback(async () => {
     try {
       await api.post('/admin/auth/logout')
-    } catch {
-      // Even if API fails, clear local session
+    } catch (err) {
+      console.error('Logout error:', err)
+      // ignore
     } finally {
       clearToken()
       setUser(null)
     }
   }, [])
+
+  // ==========================
+  // check token on refresh
+  // ==========================
+  useEffect(() => {
+    verifyToken()
+  }, [verifyToken])
+
+  // ==========================
+  // AUTO LOGOUT WHEN ADMIN LEAVES
+  // ==========================
+
 
   return (
     <AuthContext.Provider

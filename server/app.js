@@ -18,6 +18,7 @@ const adminUserRoutes = require('./src/routes/admin/users')
 const adminAuditLogRoutes = require('./src/routes/admin/auditLogs')
 const adminSettingsRoutes = require('./src/routes/admin/settings')
 const adminAnalyticsRoutes = require('./src/routes/admin/analytics')
+const adminReviewRoutes = require('./src/routes/admin/reviews')
 
 // ── Public routes ─────────────────────────────────────────────
 const publicVehicleRoutes = require('./src/routes/public/vehicles')
@@ -28,6 +29,7 @@ const publicSourcingRoutes = require('./src/routes/public/sourcing')
 const publicContactRoutes = require('./src/routes/public/contact')
 const publicSettingsRoutes = require('./src/routes/public/settings')
 const publicAnalyticsRoutes = require('./src/routes/public/analytics')
+const publicReviewRoutes = require('./src/routes/public/reviews')
 
 // ── Middleware ────────────────────────────────────────────────
 const {
@@ -102,6 +104,7 @@ app.use(`${API_PREFIX}/admin/users`, adminUserRoutes)
 app.use(`${API_PREFIX}/admin/audit-logs`, adminAuditLogRoutes)
 app.use(`${API_PREFIX}/admin/settings`, adminSettingsRoutes)
 app.use(`${API_PREFIX}/admin/analytics`, adminAnalyticsRoutes)
+app.use('/api/admin/reviews', require('./src/routes/admin/reviews'))
 
 // ── 10) Public routes ─────────────────────────────────────────
 app.use(`${API_PREFIX}/vehicles`, publicVehicleRoutes)
@@ -112,6 +115,7 @@ app.use(`${API_PREFIX}/sourcing`, formLimiter, publicSourcingRoutes)
 app.use(`${API_PREFIX}/contact`, formLimiter, publicContactRoutes)
 app.use(`${API_PREFIX}/settings`, publicSettingsRoutes)
 app.use(`${API_PREFIX}/analytics`, publicAnalyticsRoutes)
+app.use('/api/reviews', require('./src/routes/public/reviews'))
 
 // ── 11) 404 + error handler ───────────────────────────────────
 app.use(notFoundHandler)

@@ -5,20 +5,20 @@ import { useAuth } from '../../hooks/useAuth'
 import { Button } from '../ui/Button'
 
 const NAV = [
-  { label: 'Dashboard', path: '/admin', end: true },
-  { label: 'Vehicles', path: '/admin/vehicles' },
+  { label: 'Dashboard', path: '/dealer-panel', end: true },
+  { label: 'Vehicles', path: '/dealer-panel/vehicles' },
   { label: '— Leads', disabled: true },
-  { label: 'Financing', path: '/admin/finance-leads' },
-  { label: 'Trade-In', path: '/admin/trade-in-leads' },
-  { label: 'Test Drive', path: '/admin/test-drive-leads' },
-  { label: 'Sourcing', path: '/admin/sourcing-leads' },
-  { label: 'Contact', path: '/admin/contact-leads' },
+  { label: 'Financing', path: '/dealer-panel/finance-leads' },
+  { label: 'Trade-In', path: '/dealer-panel/trade-in-leads' },
+  { label: 'Test Drive', path: '/dealer-panel/test-drive-leads' },
+  { label: 'Sourcing', path: '/dealer-panel/sourcing-leads' },
+  { label: 'Contact', path: '/dealer-panel/contact-leads' },
   { label: '— Insights', disabled: true },
-  { label: 'Analytics', path: '/admin/analytics' },
+  { label: 'Analytics', path: '/dealer-panel/analytics' },
   { label: '— Admin', disabled: true },
-  { label: 'Users', path: '/admin/users' },
-  { label: 'Audit Logs', path: '/admin/audit-logs' },
-  { label: 'Settings', path: '/admin/settings' }
+  { label: 'Users', path: '/dealer-panel/users' },
+  { label: 'Audit Logs', path: '/dealer-panel/audit-logs' },
+  { label: 'Settings', path: '/dealer-panel/settings' }
 ]
 
 export function AdminLayout() {
@@ -28,7 +28,7 @@ export function AdminLayout() {
 
   const handleLogout = async () => {
     await logout()
-    navigate('/admin/login', { replace: true })
+    navigate('/dealer-panel/login', { replace: true })
   }
 
   return (
@@ -46,7 +46,7 @@ export function AdminLayout() {
           >
             {!collapsed && (
               <Link
-                to="/admin"
+                to="/dealer-panel"
                 className="text-xs font-semibold tracking-wide text-white"
               >
                 Carnex Admin

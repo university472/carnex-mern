@@ -17,7 +17,7 @@ export function AdminLogin() {
   // If somehow already authenticated in this session → redirect
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      const intended = location.state?.from || '/admin'
+      const intended = location.state?.from || '/dealer-panel'
       navigate(intended, { replace: true })
     }
   }, [isAuthenticated, loading])
@@ -59,7 +59,7 @@ export function AdminLogin() {
       login(payload)
 
       // Redirect to intended page or dashboard
-      const intended = location.state?.from || '/admin'
+      const intended = location.state?.from || '/dealer-panel'
       navigate(intended, { replace: true })
     } catch (err) {
       setError(err?.response?.data?.message || 'Invalid or expired OTP.')

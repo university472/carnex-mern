@@ -44,7 +44,7 @@ export function VehicleCard({ vehicle }) {
 
   return (
     <article className="card-surface flex flex-col overflow-hidden">
-      <div className="relative">
+      {/* <div className="relative">
         <img
           src={primaryImage}
           alt={title || 'Vehicle'}
@@ -59,7 +59,36 @@ export function VehicleCard({ vehicle }) {
           {bodyType && <Badge variant="accent">{bodyType}</Badge>}
           {fuelType && <Badge>{fuelType}</Badge>}
         </div>
-      </div>
+      </div> */}
+
+      <Link
+        to={`/vehicles/${vehicleId}`}
+        className="relative block overflow-hidden group"
+      >
+        <img
+          src={primaryImage}
+          alt={title || 'Vehicle'}
+          className="
+      h-48 
+      w-full 
+      object-cover
+      transition-transform
+      duration-300
+      group-hover:scale-105
+      cursor-pointer
+    "
+          loading="lazy"
+          onError={(e) => {
+            e.target.src =
+              'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=600'
+          }}
+        />
+
+        <div className="absolute inset-x-3 bottom-3 flex flex-wrap gap-1 text-[11px]">
+          {bodyType && <Badge variant="accent">{bodyType}</Badge>}
+          {fuelType && <Badge>{fuelType}</Badge>}
+        </div>
+      </Link>
 
       <div className="flex flex-1 flex-col gap-3 p-4">
         <header className="space-y-1">

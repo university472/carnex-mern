@@ -2,6 +2,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { PublicLayout } from './components/layout/PublicLayout'
 import { AdminLayout } from './components/layout/AdminLayout'
+import { AdminSessionWatcher } from './components/auth/AdminSessionWatcher'
+import { AdminReviews } from './pages/admin/AdminReviews'
 import { ProtectedRoute } from './utils/ProtectedRoute'
 
 import { Home } from './pages/public/Home'
@@ -35,6 +37,8 @@ import { AdminAnalytics } from './pages/admin/AdminAnalytics'
 export function App() {
   return (
     <BrowserRouter>
+      <AdminSessionWatcher />
+
       <Routes>
         {/* ── Public ──────────────────────────────────────── */}
         <Route element={<PublicLayout />}>
@@ -51,70 +55,80 @@ export function App() {
         </Route>
 
         {/* ── Admin auth (unprotected) ─────────────────────── */}
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/dealer-panel/login" element={<AdminLogin />} />
         <Route
-          path="/admin/forgot-password"
+          path="/dealer-panel/forgot-password"
           element={<AdminForgotPassword />}
         />
-        <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+        <Route
+          path="/dealer-panel/reset-password"
+          element={<AdminResetPassword />}
+        />
 
         {/* ── Protected admin area ─────────────────────────── */}
         <Route element={<ProtectedRoute />}>
           <Route element={<AdminLayout />}>
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/vehicles" element={<AdminVehicles />} />
+            <Route path="/dealer-panel" element={<AdminDashboard />} />
+            <Route path="/dealer-panel/vehicles" element={<AdminVehicles />} />
+            <Route path="/dealer-panel/reviews" element={<AdminReviews />} />
             <Route
-              path="/admin/vehicles/new"
+              path="/dealer-panel/vehicles/new"
               element={<AdminVehicleEditor />}
             />
             <Route
-              path="/admin/vehicles/:id/edit"
+              path="/dealer-panel/vehicles/:id/edit"
               element={<AdminVehicleEditor />}
             />
             <Route
-              path="/admin/finance-leads"
+              path="/dealer-panel/finance-leads"
               element={<AdminFinanceLeads />}
             />
             <Route
-              path="/admin/finance-leads/:id"
+              path="/dealer-panel/finance-leads/:id"
               element={<AdminLeadDetail />}
             />
             <Route
-              path="/admin/trade-in-leads"
+              path="/dealer-panel/trade-in-leads"
               element={<AdminTradeInLeads />}
             />
             <Route
-              path="/admin/trade-in-leads/:id"
+              path="/dealer-panel/trade-in-leads/:id"
               element={<AdminLeadDetail />}
             />
             <Route
-              path="/admin/test-drive-leads"
+              path="/dealer-panel/test-drive-leads"
               element={<AdminTestDriveLeads />}
             />
             <Route
-              path="/admin/test-drive-leads/:id"
+              path="/dealer-panel/test-drive-leads/:id"
               element={<AdminLeadDetail />}
             />
             <Route
-              path="/admin/sourcing-leads"
+              path="/dealer-panel/sourcing-leads"
               element={<AdminSourcingLeads />}
             />
             <Route
-              path="/admin/sourcing-leads/:id"
+              path="/dealer-panel/sourcing-leads/:id"
               element={<AdminLeadDetail />}
             />
             <Route
-              path="/admin/contact-leads"
+              path="/dealer-panel/contact-leads"
               element={<AdminContactLeads />}
             />
             <Route
-              path="/admin/contact-leads/:id"
+              path="/dealer-panel/contact-leads/:id"
               element={<AdminLeadDetail />}
             />
-            <Route path="/admin/analytics" element={<AdminAnalytics />} />
-            <Route path="/admin/audit-logs" element={<AdminAuditLogs />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route
+              path="/dealer-panel/analytics"
+              element={<AdminAnalytics />}
+            />
+            <Route
+              path="/dealer-panel/audit-logs"
+              element={<AdminAuditLogs />}
+            />
+            <Route path="/dealer-panel/settings" element={<AdminSettings />} />
+            <Route path="/dealer-panel/users" element={<AdminUsers />} />
           </Route>
         </Route>
       </Routes>

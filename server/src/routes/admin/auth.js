@@ -18,7 +18,7 @@ const {
   changePassword,
   confirmChangePassword
 } = require('../../controllers/admin/passwordResetController')
-const { authLimiter } = require('../../middleware/rateLimiter')
+// const { authLimiter } = require('../../middleware/rateLimiter')
 const auth = require('../../middleware/auth')
 const authorize = require('../../middleware/authorize')
 const validateRequest = require('../../middleware/validateRequest')
