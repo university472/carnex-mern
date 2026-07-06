@@ -57,7 +57,10 @@ app.use(
 )
 
 // 2) CORS
-const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:5173']
+// const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:5173']
+const allowedOrigins = process.env.CLIENT_URLS
+  ? process.env.CLIENT_URLS.split(',')
+  : ['http://localhost:5173']
 app.use(
   cors({
     origin(origin, callback) {
@@ -97,14 +100,14 @@ app.get(`${API_PREFIX}/health`, (_req, res) => {
 
 // ── 9) Admin routes ───────────────────────────────────────────
 // app.use(`${API_PREFIX}/admin/auth`, authLimiter, adminAuthRoutes)
-app.use(`${API_PREFIX}/admin/auth`, adminAuthRoutes)
+app.use(`${API_PREFIX}/admin/auth`, authLimiter, adminAuthRoutes)
 app.use(`${API_PREFIX}/admin/leads`, adminLeadRoutes)
 app.use(`${API_PREFIX}/admin/vehicles`, adminVehicleRoutes)
 app.use(`${API_PREFIX}/admin/users`, adminUserRoutes)
 app.use(`${API_PREFIX}/admin/audit-logs`, adminAuditLogRoutes)
 app.use(`${API_PREFIX}/admin/settings`, adminSettingsRoutes)
 app.use(`${API_PREFIX}/admin/analytics`, adminAnalyticsRoutes)
-app.use('/api/admin/reviews', require('./src/routes/admin/reviews'))
+app.use(`${API_PREFIX}/admin/reviews`, adminReviewRoutes)
 
 // ── 10) Public routes ─────────────────────────────────────────
 app.use(`${API_PREFIX}/vehicles`, publicVehicleRoutes)
@@ -115,7 +118,7 @@ app.use(`${API_PREFIX}/sourcing`, formLimiter, publicSourcingRoutes)
 app.use(`${API_PREFIX}/contact`, formLimiter, publicContactRoutes)
 app.use(`${API_PREFIX}/settings`, publicSettingsRoutes)
 app.use(`${API_PREFIX}/analytics`, publicAnalyticsRoutes)
-app.use('/api/reviews', require('./src/routes/public/reviews'))
+app.use(`${API_PREFIX}/reviews`, publicReviewRoutes)
 
 // ── 11) 404 + error handler ───────────────────────────────────
 app.use(notFoundHandler)

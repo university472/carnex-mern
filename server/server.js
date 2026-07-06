@@ -18,7 +18,7 @@ const startServer = async () => {
     await connectDB()
 
     // Start Express server
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(
         `🚀 Carnex API running on port ${PORT} in ${
           process.env.NODE_ENV || 'development'
@@ -33,3 +33,11 @@ const startServer = async () => {
 }
 
 startServer()
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received')
+
+  server.close(() => {
+    console.log('Server closed')
+    process.exit(0)
+  })
+})

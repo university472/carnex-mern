@@ -1,4 +1,10 @@
-const required = ['JWT_SECRET', 'MONGODB_URI']
+const required = [
+  'JWT_SECRET',
+  'MONGODB_URI',
+  'CLOUDINARY_CLOUD_NAME',
+  'CLOUDINARY_API_KEY',
+  'CLOUDINARY_API_SECRET'
+]
 
 module.exports = () => {
   const missing = required.filter((key) => !process.env[key])

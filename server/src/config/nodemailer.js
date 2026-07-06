@@ -72,32 +72,3 @@ const sendOTPEmail = async ({ to, name, code, purpose }) => {
 }
 
 module.exports = { transporter, sendMail, sendOTPEmail }
-
-// // server/src/config/nodemailer.js
-// const nodemailer = require('nodemailer')
-
-// const transporter = nodemailer.createTransport({
-//   host: process.env.SMTP_HOST || 'smtp.gmail.com',
-//   port: Number(process.env.SMTP_PORT) || 587,
-//   secure: false,
-//   auth: {
-//     user: process.env.SMTP_USER,
-//     pass: process.env.SMTP_PASS
-//   }
-// })
-
-// /**
-//  * Send an email.
-//  * @param {Object} opts
-//  * @param {string|string[]} opts.to
-//  * @param {string} opts.subject
-//  * @param {string} [opts.text]
-//  * @param {string} [opts.html]
-//  */
-// const sendMail = async ({ to, subject, text, html }) => {
-//   const from =
-//     process.env.SMTP_FROM || `Carnex Auto Sales <${process.env.SMTP_USER}>`
-//   await transporter.sendMail({ from, to, subject, text, html })
-// }
-
-// module.exports = { transporter, sendMail }
