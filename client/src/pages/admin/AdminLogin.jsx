@@ -45,29 +45,60 @@ export function AdminLogin() {
     }
   }
 
+  // const handleOTP = async (e) => {
+  //   e.preventDefault()
+  //   setError('')
+  //   setSubmitting(true)
+  //   try {
+  //     const { data } = await api.post('/admin/auth/verify-otp', {
+  //       code: otp
+  //     })
+  //     const payload = data?.data || data
+
+  //     // Store in sessionStorage via AuthContext login()
+  //     login(payload)
+
+  //     // Redirect to intended page or dashboard
+  //     const intended = location.state?.from || '/dealer-panel'
+  //     navigate(intended, { replace: true })
+  //   } catch (err) {
+  //     setError(err?.response?.data?.message || 'Invalid or expired OTP.')
+  //   } finally {
+  //     setSubmitting(false)
+  //   }
+  // }
+
   const handleOTP = async (e) => {
     e.preventDefault()
+
     setError('')
     setSubmitting(true)
+
     try {
       const { data } = await api.post('/admin/auth/verify-otp', {
         code: otp
       })
+
       const payload = data?.data || data
 
-      // Store in sessionStorage via AuthContext login()
-      login(payload)
+      login({
+        ...payload.user,
+        token: payload.token
+      })
 
-      // Redirect to intended page or dashboard
-      const intended = location.state?.from || '/dealer-panel'
-      navigate(intended, { replace: true })
+      setTimeout(() => {
+        const intended = location.state?.from || '/dealer-panel'
+
+        navigate(intended, {
+          replace: true
+        })
+      }, 100)
     } catch (err) {
       setError(err?.response?.data?.message || 'Invalid or expired OTP.')
     } finally {
       setSubmitting(false)
     }
   }
-
   const handleResend = async () => {
     setError('')
     setSubmitting(true)
@@ -147,7 +178,7 @@ export function AdminLogin() {
             />
             <div className="flex items-center justify-between pt-1">
               <Link
-                to="/admin/forgot-password"
+                to="/dealer-panel/forgot-password"
                 className="text-xs text-brand-muted hover:text-brand-primary
                            transition-colors"
               >

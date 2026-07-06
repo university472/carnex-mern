@@ -19,8 +19,6 @@ const AuthContext = createContext({
 })
 
 export function AuthProvider({ children }) {
-
-
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -59,6 +57,19 @@ export function AuthProvider({ children }) {
   // ==========================
   // login after OTP
   // ==========================
+  // const login = useCallback((payload) => {
+  //   if (payload?.token) {
+  //     setToken(payload.token)
+  //   }
+
+  //   setUser({
+  //     id: payload?.id || payload?._id,
+  //     name: payload?.name,
+  //     email: payload?.email,
+  //     role: payload?.role || 'admin'
+  //   })
+  // }, [])
+
   const login = useCallback((payload) => {
     if (payload?.token) {
       setToken(payload.token)
@@ -66,12 +77,16 @@ export function AuthProvider({ children }) {
 
     setUser({
       id: payload?.id || payload?._id,
+
       name: payload?.name,
+
       email: payload?.email,
+
       role: payload?.role || 'admin'
     })
-  }, [])
 
+    setLoading(false)
+  }, [])
   // ==========================
   // logout
   // ==========================
@@ -97,7 +112,6 @@ export function AuthProvider({ children }) {
   // ==========================
   // AUTO LOGOUT WHEN ADMIN LEAVES
   // ==========================
-
 
   return (
     <AuthContext.Provider

@@ -79,7 +79,7 @@ export function AdminVehicles() {
             site.
           </p>
         </div>
-        <Link to="/admin/vehicles/new">
+        <Link to="/dealer-panel/vehicles/new">
           <Button size="md">+ Add vehicle</Button>
         </Link>
       </header>
@@ -123,7 +123,7 @@ export function AdminVehicles() {
         ) : vehicles.length === 0 ? (
           <div className="py-8 text-center">
             <p className="text-sm text-brand-muted mb-3">No vehicles found.</p>
-            <Link to="/admin/vehicles/new">
+            <Link to="/dealer-panel/vehicles/new">
               <Button size="sm">Add your first vehicle</Button>
             </Link>
           </div>
@@ -185,7 +185,7 @@ export function AdminVehicles() {
                         {formatDate(v.createdAt)}
                       </td>
                       <td className="py-2 flex items-center gap-1.5">
-                        <Link to={`/admin/vehicles/${v._id}/edit`}>
+                        <Link to={`/dealer-panel/vehicles/${v._id}/edit`}>
                           <Button size="sm" variant="ghost">
                             Edit
                           </Button>

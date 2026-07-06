@@ -20,12 +20,15 @@ export function clearToken() {
   sessionStorage.removeItem(TOKEN_KEY)
 }
 
-// ── Axios instance ────────────────────────────────────────────
+// // ── Axios instance ────────────────────────────────────────────
+// const api = axios.create({
+//   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+//   withCredentials: true
+// })
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: 'http://localhost:5000/api',
   withCredentials: true
 })
-
 // Attach JWT token to every request
 api.interceptors.request.use((config) => {
   const token = getToken()
@@ -43,18 +46,18 @@ api.interceptors.response.use(
       const currentPath = window.location.pathname
 
       const publicAdminPaths = [
-        '/admin/login',
-        '/admin/forgot-password',
-        '/admin/reset-password'
+        '/dealer-panel/login',
+        '/dealer-panel/forgot-password',
+        '/dealer-panel/reset-password'
       ]
 
       const isProtectedAdmin =
-        currentPath.startsWith('/admin') &&
+        currentPath.startsWith('/dealer-panel') &&
         !publicAdminPaths.includes(currentPath)
 
       if (isProtectedAdmin) {
         clearToken()
-        window.location.href = '/admin/login'
+        window.location.href = '/dealer-panel/login'
       }
     }
 

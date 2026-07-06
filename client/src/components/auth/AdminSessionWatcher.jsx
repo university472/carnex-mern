@@ -7,7 +7,7 @@ export function AdminSessionWatcher() {
   const { isAuthenticated, logout } = useAuth()
 
   useEffect(() => {
-    const leavingAdmin = !location.pathname.startsWith('/admin')
+    const leavingAdmin = !location.pathname.startsWith('/dealer-panel')
 
     if (isAuthenticated && leavingAdmin) {
       logout()

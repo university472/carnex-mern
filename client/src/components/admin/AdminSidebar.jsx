@@ -22,7 +22,7 @@ export function AdminSidebar() {
 
       <nav className="flex-1 px-3 space-y-1 text-xs">
         <NavLink
-          to="/admin"
+          to="/dealer-panel"
           end
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
@@ -31,7 +31,7 @@ export function AdminSidebar() {
           Dashboard
         </NavLink>
         <NavLink
-          to="/admin/vehicles"
+          to="/dealer-panel/vehicles"
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -39,7 +39,7 @@ export function AdminSidebar() {
           Vehicles
         </NavLink>
         <NavLink
-          to="/admin/finance-leads"
+          to="/dealer-panel/finance-leads"
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -47,7 +47,7 @@ export function AdminSidebar() {
           Financing Leads
         </NavLink>
         <NavLink
-          to="/admin/trade-in-leads"
+          to="/dealer-panel/trade-in-leads"
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -55,7 +55,7 @@ export function AdminSidebar() {
           Trade-In Leads
         </NavLink>
         <NavLink
-          to="/admin/test-drive-leads"
+          to="/dealer-panel/test-drive-leads"
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -63,7 +63,7 @@ export function AdminSidebar() {
           Test Drive Leads
         </NavLink>
         <NavLink
-          to="/admin/sourcing-leads"
+          to="/dealer-panel/sourcing-leads"
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -71,7 +71,7 @@ export function AdminSidebar() {
           Sourcing Leads
         </NavLink>
         <NavLink
-          to="/admin/contact-leads"
+          to="/dealer-panel/contact-leads"
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }

@@ -286,12 +286,12 @@ export function AdminDashboard() {
           <p className="text-xs font-medium text-brand-muted uppercase tracking-wide">
             Inventory
           </p>
-          <Link to="/admin/vehicles">
-            <Button size="sm" className="w-full">
+          <Link to="/dealer-panel/vehicles">
+            <Button size="sm" className="w-full" variant="secondary">
               Manage Vehicles
             </Button>
           </Link>
-          <Link to="/admin/vehicles/new">
+          <Link to="/dealer-panel/vehicles/new">
             <Button size="sm" variant="ghost" className="w-full">
               Add New Vehicle
             </Button>
@@ -303,12 +303,12 @@ export function AdminDashboard() {
           <p className="text-xs font-medium text-brand-muted uppercase tracking-wide">
             Leads
           </p>
-          <Link to="/admin/finance-leads">
+          <Link to="/dealer-panel/finance-leads">
             <Button size="sm" variant="secondary" className="w-full">
               Financing Leads
             </Button>
           </Link>
-          <Link to="/admin/contact-leads">
+          <Link to="/dealer-panel/contact-leads">
             <Button size="sm" variant="ghost" className="w-full">
               Contact Messages
             </Button>
@@ -320,13 +320,13 @@ export function AdminDashboard() {
           <p className="text-xs font-medium text-brand-muted uppercase tracking-wide">
             Reviews
           </p>
-          <Link to="/admin/reviews">
+          <Link to="/dealer-panel/reviews">
             <Button size="sm" variant="secondary" className="w-full">
               Manage Customer Reviews
             </Button>
           </Link>
           {/* Optional: link to pending reviews directly */}
-          <Link to="/admin/reviews">
+          <Link to="/dealer-panel/reviews">
             <Button size="sm" variant="ghost" className="w-full">
               Pending Approval
             </Button>
@@ -338,12 +338,12 @@ export function AdminDashboard() {
           <p className="text-xs font-medium text-brand-muted uppercase tracking-wide">
             Admin
           </p>
-          <Link to="/admin/users">
+          <Link to="/dealer-panel/users">
             <Button size="sm" variant="secondary" className="w-full">
               Manage Users
             </Button>
           </Link>
-          <Link to="/admin/audit-logs">
+          <Link to="/dealer-panel/audit-logs">
             <Button size="sm" variant="ghost" className="w-full">
               View Audit Logs
             </Button>
@@ -358,7 +358,7 @@ export function AdminDashboard() {
             Recent Inventory
           </h2>
           <Link
-            to="/admin/vehicles"
+            to="/dealer-panel/vehicles"
             className="text-xs text-brand-primary hover:underline"
           >
             View all
@@ -375,7 +375,7 @@ export function AdminDashboard() {
           <p className="text-sm text-brand-muted">
             No vehicles yet.{' '}
             <Link
-              to="/admin/vehicles/new"
+              to="/dealer-panel/vehicles/new"
               className="text-brand-primary hover:underline"
             >
               Add your first listing.
