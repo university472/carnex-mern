@@ -20,11 +20,13 @@ export function VehicleCard({ vehicle }) {
     transmission,
     imageUrl,
     images,
-    location
+    location,
+    status
   } = vehicle
 
   // Use MongoDB _id if available, fall back to legacy id field
   const vehicleId = _id || id
+  const isSold = status === 'sold'
 
   // Resolve best available image
   const primaryImage =
@@ -83,6 +85,32 @@ export function VehicleCard({ vehicle }) {
               'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=600'
           }}
         />
+        {isSold && (
+          <>
+            {/* soft overlay */}
+            <div className="absolute inset-0 bg-black/25" />
+
+            {/* sold badge */}
+            <div
+              className="
+        absolute
+        top-3
+        right-3
+        bg-red-600
+        text-white
+        px-4
+        py-1.5
+        rounded-full
+        text-xs
+        font-black
+        tracking-widest
+        shadow-lg
+      "
+            >
+              SOLD
+            </div>
+          </>
+        )}
 
         <div className="absolute inset-x-3 bottom-3 flex flex-wrap gap-1 text-[11px]">
           {bodyType && <Badge variant="accent">{bodyType}</Badge>}
@@ -129,14 +157,30 @@ export function VehicleCard({ vehicle }) {
               View Details
             </Button>
           </Link>
-          <Link
-            to={`/financing?vehicle=${vehicleId}`}
-            className="flex-1 min-w-[140px]"
-          >
-            <Button size="sm" variant="secondary" className="w-full">
-              Start Financing
+          {!isSold ? (
+            <Link
+              to={`/financing?vehicle=${vehicleId}`}
+              className="flex-1 min-w-[140px]"
+            >
+              <Button size="sm" variant="secondary" className="w-full">
+                Start Financing
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              size="sm"
+              disabled
+              className="
+    flex-1
+    min-w-[140px]
+    bg-slate-200
+    text-slate-600
+    cursor-not-allowed
+  "
+            >
+              Sold Vehicle
             </Button>
-          </Link>
+          )}
         </div>
       </div>
     </article>

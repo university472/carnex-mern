@@ -25,7 +25,7 @@ export function AdminContactLeads() {
       title="Contact Messages"
       description="Messages submitted through the public contact form."
       leadType="contact"
-      detailRoute="/admin/contact-leads"
+      detailRoute="/dealer-panel/contact-leads"
       extraColumns={extraColumns}
     />
   )

@@ -5,7 +5,7 @@ require('dotenv').config()
 
 const validateEnv = require('./src/config/validateEnv')
 const app = require('./app')
-const { connectDB } = require('./src/config/db')
+const { connectDB, closeDB } = require('./src/config/db')
 
 // Validate required ENV variables after dotenv is loaded
 validateEnv()
@@ -34,10 +34,19 @@ const startServer = async () => {
 
 startServer()
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received')
+  // console.log('SIGTERM received')
 
-  server.close(() => {
-    console.log('Server closed')
-    process.exit(0)
+  // server.close(() => {
+  //   console.log('Server closed')
+  //   process.exit(0)
+  // })
+  process.on('SIGTERM', async () => {
+    console.log('SIGTERM received')
+
+    server.close(async () => {
+      await closeDB()
+
+      process.exit(0)
+    })
   })
 })

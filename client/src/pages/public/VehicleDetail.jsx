@@ -351,7 +351,7 @@ export function VehicleDetail() {
 
   const salePrice = badges.salePrice || vehicle.salePrice
   const showSale = salePrice && salePrice < price
-
+  const isSold = vehicle.status === 'sold'
   // ── Build spec columns (same data as before) ────────
   const engineSpecs = specs.engine || {}
   const engineCols = [
@@ -477,7 +477,24 @@ export function VehicleDetail() {
               {bodyType}
             </p>
           </div>
-          <StoreStatusBadge />
+          {isSold ? (
+            <span
+              className="
+      rounded-full
+      bg-red-600
+      px-5
+      py-2
+      text-sm
+      font-black
+      text-white
+      tracking-widest
+    "
+            >
+              SOLD
+            </span>
+          ) : (
+            <StoreStatusBadge />
+          )}
         </div>
       </div>
 
@@ -624,44 +641,48 @@ export function VehicleDetail() {
           </div>
 
           {/* Financing / CARFAX bar */}
-          <Card className="p-6 flex flex-wrap items-center justify-between gap-6 bg-gradient-to-r from-white to-slate-50">
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:flex h-12 w-12 rounded-xl bg-red-50 items-center justify-center flex-shrink-0">
-                <Icon.bolt className="h-6 w-6 text-red-600" />
+          {!isSold && (
+            <Card className="p-6 flex flex-wrap items-center justify-between gap-6 bg-gradient-to-r from-white to-slate-50">
+              <div className="flex items-center gap-4">
+                <div className="hidden sm:flex h-12 w-12 rounded-xl bg-red-50 items-center justify-center flex-shrink-0">
+                  <Icon.bolt className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-900 font-bold">
+                    Financing Available
+                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    All credit types welcome · Fast approval
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-slate-900 font-bold">
-                  Financing Available
-                </p>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  All credit types welcome · Fast approval
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                asChild
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
-              >
-                <Link to={`/financing?vehicle=${vehicle._id}`}>Apply Now</Link>
-              </Button>
-              {media.carfaxUrl ? (
-                <a
-                  href={media.carfaxUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-white px-5 py-2.5 text-xs font-bold text-slate-900 shadow border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transition-all"
+              <div className="flex items-center gap-3">
+                <Button
+                  asChild
+                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
                 >
-                  <Icon.doc className="h-4 w-4 text-slate-500" />
-                  SHOW ME THE <span className="text-blue-600">CARFAX</span>
-                </a>
-              ) : (
-                <p className="text-xs text-slate-400 italic">
-                  CARFAX not available
-                </p>
-              )}
-            </div>
-          </Card>
+                  <Link to={`/financing?vehicle=${vehicle._id}`}>
+                    Apply Now
+                  </Link>
+                </Button>
+                {media.carfaxUrl ? (
+                  <a
+                    href={media.carfaxUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-white px-5 py-2.5 text-xs font-bold text-slate-900 shadow border border-slate-200 hover:shadow-md hover:-translate-y-0.5 transition-all"
+                  >
+                    <Icon.doc className="h-4 w-4 text-slate-500" />
+                    SHOW ME THE <span className="text-blue-600">CARFAX</span>
+                  </a>
+                ) : (
+                  <p className="text-xs text-slate-400 italic">
+                    CARFAX not available
+                  </p>
+                )}
+              </div>
+            </Card>
+          )}
 
           {/* ─── Standard Specifications ─── */}
           <Card className="p-6 sm:p-7 space-y-7">
@@ -710,12 +731,29 @@ export function VehicleDetail() {
 
         {/* Right sidebar */}
         <div className="space-y-6 lg:sticky lg:top-24">
-          <Card className="p-5" id="quote-form">
-            <QuoteForm vehicle={vehicle} />
-          </Card>
-          <Card className="p-5">
-            <PaymentCalculator price={salePrice || price} />
-          </Card>
+          {isSold ? (
+            <Card className="p-6 text-center">
+              <h3 className="text-xl font-black text-red-600">SOLD VEHICLE</h3>
+
+              <p className="mt-2 text-sm text-slate-600">
+                This vehicle has been sold. Please check our latest inventory.
+              </p>
+
+              <Link to="/inventory">
+                <Button className="mt-4 w-full">View Available Cars</Button>
+              </Link>
+            </Card>
+          ) : (
+            <>
+              <Card className="p-5" id="quote-form">
+                <QuoteForm vehicle={vehicle} />
+              </Card>
+
+              <Card className="p-5">
+                <PaymentCalculator price={salePrice || price} />
+              </Card>
+            </>
+          )}
           <div className="rounded-2xl bg-slate-900 px-5 py-4 flex items-center gap-3">
             <Icon.shield className="h-6 w-6 text-red-500 flex-shrink-0" />
             <p className="text-xs text-slate-300 leading-snug">

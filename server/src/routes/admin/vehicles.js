@@ -9,7 +9,9 @@ const {
   adminCreateVehicle,
   adminUpdateVehicle,
   adminUpdateVehicleStatus,
-  adminSoftDeleteVehicle
+  adminSoftDeleteVehicle,
+  adminDecodeVin,
+  adminSoldVehicles
 } = require('../../controllers/admin/vehicleController')
 const {
   createVehicleValidator,
@@ -35,6 +37,16 @@ router.get(
   adminGetVehicles
 )
 
+router.get(
+  '/sold/history',
+  authorize('super-admin', 'admin', 'sales', 'viewer'),
+  adminSoldVehicles
+)
+router.get(
+  '/decode-vin/:vin',
+  authorize('super-admin', 'admin'),
+  adminDecodeVin
+)
 router.get(
   '/:id',
   authorize('super-admin', 'admin', 'sales', 'viewer'),

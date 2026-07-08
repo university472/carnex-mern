@@ -34,5 +34,16 @@ async function connectDB() {
     process.exit(1)
   }
 }
+async function closeDB() {
+  await mongoose.connection.close()
 
+  console.log(
+    'MongoDB connection closed'
+  )
+}
+
+module.exports = {
+  connectDB,
+  closeDB
+}
 module.exports = { connectDB }

@@ -29,7 +29,7 @@ export function AdminTradeInLeads() {
       title="Trade-In Leads"
       description="Customers who submitted a trade-in valuation request."
       leadType="tradeIn"
-      detailRoute="/admin/trade-in-leads"
+      detailRoute="/dealer-panel/trade-in-leads"
       extraColumns={extraColumns}
     />
   )

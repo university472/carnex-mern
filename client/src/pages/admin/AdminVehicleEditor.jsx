@@ -163,6 +163,7 @@ export function AdminVehicleEditor() {
   const [form, setForm] = useState(initialForm)
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(false)
+  const [vinLoading, setVinLoading] = useState(false)
   const [fetching, setFetching] = useState(isEdit)
 
   // Load existing vehicle for editing
@@ -223,6 +224,83 @@ export function AdminVehicleEditor() {
       return { ...prev, [field]: value }
     })
   }, [])
+  const handleDecodeVin = async () => {
+    if (!form.vin || form.vin.length !== 17) {
+      toast.error('Enter valid 17 character VIN')
+      return
+    }
+
+    try {
+      setVinLoading(true)
+
+      const res = await api.get(`/admin/vehicles/decode-vin/${form.vin}`)
+
+      const v = res.data.data
+
+      setForm((prev) => ({
+        ...prev,
+
+        make: v.make || prev.make,
+        model: v.model || prev.model,
+        year: v.year || prev.year,
+
+        bodyType: v.bodyType || prev.bodyType,
+
+        fuelType: v.fuelType || prev.fuelType,
+
+        specs: {
+          ...prev.specs,
+
+          trim: v.trim || v.specs?.trim || prev.specs.trim,
+
+          doors: v.doors || v.specs?.doors || prev.specs.doors,
+
+          engine: {
+            ...prev.specs.engine,
+
+            size: v.specs?.engine?.size || prev.specs.engine.size,
+
+            type: v.specs?.engine?.configuration || prev.specs.engine.type,
+
+            cylinders:
+              v.specs?.engine?.cylinders || prev.specs.engine.cylinders,
+
+            horsepower:
+              v.specs?.engine?.horsepower || prev.specs.engine.horsepower
+          },
+
+          transmission: {
+            ...prev.specs.transmission,
+
+            type: v.specs?.transmission?.type || prev.specs.transmission.type
+          },
+
+          fuelEconomy: {
+            ...prev.specs.fuelEconomy,
+
+            cityMpg:
+              v.specs?.fuelEconomy?.cityMpg || prev.specs.fuelEconomy.cityMpg,
+
+            highwayMpg:
+              v.specs?.fuelEconomy?.highwayMpg ||
+              prev.specs.fuelEconomy.highwayMpg,
+
+            combinedMpg:
+              v.specs?.fuelEconomy?.combinedMpg ||
+              prev.specs.fuelEconomy.combinedMpg
+          }
+        },
+
+        driveType: v.specs?.drivetrain?.driveType || prev.driveType
+      }))
+
+      toast.success('VIN decoded successfully')
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'VIN decode failed')
+    } finally {
+      setVinLoading(false)
+    }
+  }
 
   const handleFiles = (accepted) => {
     setFiles((prev) => {
@@ -251,19 +329,19 @@ export function AdminVehicleEditor() {
     console.log('CONDITION:', form.condition)
     console.log('==================================')
     setLoading(true)
-    if (
-      form.condition !== 'new' &&
-      (!form.mileage || Number(form.mileage) < 1)
-    ) {
-      toast.error('Mileage is required for used and certified vehicles.')
-      setLoading(false)
-      return
-    }
-    if (!form.bodyType) {
-      toast.error('Please select a Body Type.')
-      setLoading(false)
-      return
-    }
+    // if (
+    //   form.condition !== 'new' &&
+    //   (!form.mileage || Number(form.mileage) < 1)
+    // ) {
+    //   toast.error('Mileage is required for used and certified vehicles.')
+    //   setLoading(false)
+    //   return
+    // }
+    // if (!form.bodyType) {
+    //   toast.error('Please select a Body Type.')
+    //   setLoading(false)
+    //   return
+    // }
     if (form.vin && form.vin.trim().length !== 17) {
       toast.error('VIN must be exactly 17 characters')
       setLoading(false)
@@ -291,11 +369,12 @@ export function AdminVehicleEditor() {
       // Basic Information
       payload.year = form.year ? Number(form.year) : undefined
       payload.price = form.price ? Number(form.price) : undefined
-      if (payload.condition === 'new') {
-        payload.mileage = form.mileage === '' ? 0 : Number(form.mileage)
-      } else {
-        payload.mileage = Number(form.mileage)
-      }
+      // if (payload.condition === 'new') {
+      //   payload.mileage = form.mileage === '' ? 0 : Number(form.mileage)
+      // } else {
+      //   payload.mileage = Number(form.mileage)
+      // }
+      payload.mileage = form.mileage ? Number(form.mileage) : undefined
 
       // Pricing
       payload.badges.salePrice = form.badges.salePrice
@@ -454,7 +533,7 @@ export function AdminVehicleEditor() {
                 { label: 'Certified', value: 'certified' }
               ]}
             />
-            <Input
+            {/* <Input
               label={`Mileage${form.condition !== 'new' ? ' *' : ''}`}
               type="number"
               value={form.mileage}
@@ -465,6 +544,12 @@ export function AdminVehicleEditor() {
                   ? 'Optional for new vehicles.'
                   : 'Required for used and certified vehicles.'
               }
+            /> */}
+            <Input
+              label="Mileage"
+              type="number"
+              value={form.mileage}
+              onChange={(e) => updateField('mileage', e.target.value)}
             />
 
             <Input
@@ -472,11 +557,23 @@ export function AdminVehicleEditor() {
               value={form.stockNumber}
               onChange={(e) => updateField('stockNumber', e.target.value)}
             />
-            <Input
-              label="VIN"
-              value={form.vin}
-              onChange={(e) => updateField('vin', e.target.value)}
-            />
+            <div className="flex gap-2 items-end">
+              <Input
+                label="VIN"
+                value={form.vin}
+                onChange={(e) =>
+                  updateField('vin', e.target.value.toUpperCase())
+                }
+              />
+
+              <Button
+                type="button"
+                onClick={handleDecodeVin}
+                disabled={vinLoading}
+              >
+                {vinLoading ? 'Checking...' : 'Decode'}
+              </Button>
+            </div>
             <Input
               label="Exterior Color"
               value={form.exteriorColor}
@@ -489,10 +586,15 @@ export function AdminVehicleEditor() {
             />
 
             <Select
-              label="Body Type *"
+              label="Body Type"
               value={form.bodyType}
               options={bodyTypeOptions}
               onChange={(e) => updateField('bodyType', e.target.value)}
+            />
+            <Input
+              label="Drive Type"
+              value={form.driveType}
+              onChange={(e) => updateField('driveType', e.target.value)}
             />
           </div>
         </CollapsibleSection>

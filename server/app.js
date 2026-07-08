@@ -19,6 +19,7 @@ const adminAuditLogRoutes = require('./src/routes/admin/auditLogs')
 const adminSettingsRoutes = require('./src/routes/admin/settings')
 const adminAnalyticsRoutes = require('./src/routes/admin/analytics')
 const adminReviewRoutes = require('./src/routes/admin/reviews')
+const adminNotificationRoutes = require('./src/routes/admin/notifications')
 
 // ── Public routes ─────────────────────────────────────────────
 const publicVehicleRoutes = require('./src/routes/public/vehicles')
@@ -100,7 +101,7 @@ app.get(`${API_PREFIX}/health`, (_req, res) => {
 
 // ── 9) Admin routes ───────────────────────────────────────────
 // app.use(`${API_PREFIX}/admin/auth`, authLimiter, adminAuthRoutes)
-app.use(`${API_PREFIX}/admin/auth`, authLimiter, adminAuthRoutes)
+app.use(`${API_PREFIX}/admin/auth`, adminAuthRoutes)
 app.use(`${API_PREFIX}/admin/leads`, adminLeadRoutes)
 app.use(`${API_PREFIX}/admin/vehicles`, adminVehicleRoutes)
 app.use(`${API_PREFIX}/admin/users`, adminUserRoutes)
@@ -108,6 +109,7 @@ app.use(`${API_PREFIX}/admin/audit-logs`, adminAuditLogRoutes)
 app.use(`${API_PREFIX}/admin/settings`, adminSettingsRoutes)
 app.use(`${API_PREFIX}/admin/analytics`, adminAnalyticsRoutes)
 app.use(`${API_PREFIX}/admin/reviews`, adminReviewRoutes)
+app.use(`${API_PREFIX}/admin/notifications`, adminNotificationRoutes)
 
 // ── 10) Public routes ─────────────────────────────────────────
 app.use(`${API_PREFIX}/vehicles`, publicVehicleRoutes)

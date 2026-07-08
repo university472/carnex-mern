@@ -26,7 +26,7 @@ export function AdminTestDriveLeads() {
       title="Test Drive Leads"
       description="Customers who requested to schedule a test drive."
       leadType="testDrive"
-      detailRoute="/admin/test-drive-leads"
+      detailRoute="/dealer-panel/test-drive-leads"
       extraColumns={extraColumns}
     />
   )

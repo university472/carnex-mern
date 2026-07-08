@@ -33,7 +33,11 @@ async function getVehicles(req, res, next) {
     const limitNum = Math.min(Number(limit) || 12, 60)
     const skip = (pageNum - 1) * limitNum
 
-    const filter = { status: 'available' }
+    const filter = {
+      status: {
+        $in: ['available', 'sold']
+      }
+    }
 
     if (make) filter.make = safeRegex(make)
     if (model) filter.model = safeRegex(model)

@@ -28,7 +28,7 @@ export function AdminSourcingLeads() {
       title="Sourcing Leads"
       description="Customers who submitted a vehicle sourcing request."
       leadType="sourcing"
-      detailRoute="/admin/sourcing-leads"
+      detailRoute="/dealer-panel/sourcing-leads"
       extraColumns={extraColumns}
     />
   )

@@ -27,7 +27,7 @@ export function AdminFinanceLeads() {
       title="Financing Leads"
       description="Customers who submitted a financing application."
       leadType="finance"
-      detailRoute="/admin/finance-leads"
+      detailRoute="/dealer-panel/finance-leads"
       extraColumns={extraColumns}
     />
   )

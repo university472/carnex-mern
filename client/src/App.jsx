@@ -22,6 +22,7 @@ import { AdminForgotPassword } from './pages/admin/AdminForgotPassword'
 import { AdminResetPassword } from './pages/admin/AdminResetPassword'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { AdminVehicles } from './pages/admin/AdminVehicles'
+import { AdminSoldVehicles } from './pages/admin/AdminSoldVehicles'
 import { AdminVehicleEditor } from './pages/admin/AdminVehicleEditor'
 import { AdminFinanceLeads } from './pages/admin/AdminFinanceLeads'
 import { AdminTradeInLeads } from './pages/admin/AdminTradeInLeads'
@@ -70,6 +71,10 @@ export function App() {
           <Route element={<AdminLayout />}>
             <Route path="/dealer-panel" element={<AdminDashboard />} />
             <Route path="/dealer-panel/vehicles" element={<AdminVehicles />} />
+            <Route
+              path="/dealer-panel/sold-history"
+              element={<AdminSoldVehicles />}
+            />
             <Route path="/dealer-panel/reviews" element={<AdminReviews />} />
             <Route
               path="/dealer-panel/vehicles/new"

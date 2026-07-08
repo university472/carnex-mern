@@ -5,21 +5,11 @@ import api from '../../services/api'
 import { useVehicles } from '../../hooks/useVehicles'
 import { Button } from '../../components/ui/Button'
 // import { Badge } from '../../components/ui/Badge'
-import { Input } from '../../components/ui/Input'
-import { Select } from '../../components/ui/Select'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { Pagination } from '../../components/ui/Pagination'
 import { useToast } from '../../hooks/useToast'
 import { formatPrice, formatMileage, formatDate } from '../../utils/formatters'
-
-const STATUS_OPTIONS = [
-  { label: 'All statuses', value: '' },
-  { label: 'Available', value: 'available' },
-  { label: 'Reserved', value: 'reserved' },
-  { label: 'Sold', value: 'sold' },
-  { label: 'Hidden', value: 'hidden' }
-]
 
 // const STATUS_BADGE = {
 //   available: 'success',
@@ -30,15 +20,21 @@ const STATUS_OPTIONS = [
 
 export function AdminVehicles() {
   const toast = useToast()
-  const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('')
   const [page, setPage] = useState(1)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleting, setDeleting] = useState(false)
+  const [saleTarget, setSaleTarget] = useState(null)
+
+  const [saleForm, setSaleForm] = useState({
+    soldPrice: '',
+    buyerName: '',
+    buyerPhone: '',
+    buyerEmail: ''
+  })
+
+  const [savingSale, setSavingSale] = useState(false)
 
   const { vehicles, pagination, loading, reload } = useVehicles({
-    search: search || undefined,
-    status: status || undefined,
     page,
     limit: 20
   })
@@ -58,14 +54,59 @@ export function AdminVehicles() {
   }
 
   const handleStatusChange = async (vehicle, newStatus) => {
+    if (newStatus === 'sold') {
+      setSaleTarget(vehicle)
+
+      setSaleForm({
+        soldPrice: vehicle.price || '',
+        buyerName: '',
+        buyerPhone: '',
+        buyerEmail: ''
+      })
+
+      return
+    }
+
     try {
       await api.patch(`/admin/vehicles/${vehicle._id}/status`, {
         status: newStatus
       })
+
       toast.success(`Status updated to "${newStatus}"`)
+
       reload()
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Failed to update status')
+    }
+  }
+
+  const completeSale = async () => {
+    if (!saleTarget) return
+
+    setSavingSale(true)
+
+    try {
+      await api.patch(`/admin/vehicles/${saleTarget._id}/status`, {
+        status: 'sold',
+
+        soldPrice: saleForm.soldPrice,
+
+        buyer: {
+          name: saleForm.buyerName,
+          phone: saleForm.buyerPhone,
+          email: saleForm.buyerEmail
+        }
+      })
+
+      toast.success('Vehicle sale recorded')
+
+      setSaleTarget(null)
+
+      reload()
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to save sale')
+    } finally {
+      setSavingSale(false)
     }
   }
 
@@ -86,7 +127,7 @@ export function AdminVehicles() {
 
       <div className="card-surface p-5 space-y-4">
         {/* Filters */}
-        <div className="flex flex-wrap gap-3">
+        {/* <div className="flex flex-wrap gap-3">
           <div className="flex-1 min-w-[200px]">
             <Input
               id="v-search"
@@ -111,7 +152,7 @@ export function AdminVehicles() {
               }}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Table */}
         {loading ? (
@@ -141,6 +182,11 @@ export function AdminVehicles() {
                     <th className="py-2 pr-3 font-medium">Body</th>
                     <th className="py-2 pr-3 font-medium">Status</th>
                     <th className="py-2 pr-3 font-medium">Added</th>
+
+                    <th className="py-2 pr-3 font-medium">Sold Date</th>
+
+                    <th className="py-2 pr-3 font-medium">Sold By</th>
+
                     <th className="py-2 font-medium">Actions</th>
                   </tr>
                 </thead>
@@ -150,7 +196,9 @@ export function AdminVehicles() {
                       key={v._id}
                       className="border-b border-brand-border/60 hover:bg-brand-surface/50 transition-colors"
                     >
-                      <td className="py-2 pr-3">{v.year}</td>
+                      <td className="py-2 pr-3 text-gray-900 font-medium">
+                        {v.year}
+                      </td>
                       <td className="py-2 pr-3 font-medium text-brand-secondary">
                         {v.make}
                       </td>
@@ -170,7 +218,20 @@ export function AdminVehicles() {
                           onChange={(e) =>
                             handleStatusChange(v, e.target.value)
                           }
-                          className="text-xs border border-brand-border rounded px-1.5 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                          className="
+text-xs
+font-semibold
+border
+border-brand-border
+rounded
+px-2
+py-1
+bg-white
+text-gray-900
+focus:outline-none
+focus:ring-1
+focus:ring-brand-primary
+"
                         >
                           {['available', 'reserved', 'sold', 'hidden'].map(
                             (s) => (
@@ -183,6 +244,14 @@ export function AdminVehicles() {
                       </td>
                       <td className="py-2 pr-3 text-brand-muted">
                         {formatDate(v.createdAt)}
+                      </td>
+
+                      <td className="py-2 pr-3 text-brand-muted">
+                        {v.status === 'sold' ? formatDate(v.soldAt) : '—'}
+                      </td>
+
+                      <td className="py-2 pr-3 text-brand-muted">
+                        {v.status === 'sold' ? v.soldBy?.name || 'Admin' : '—'}
                       </td>
                       <td className="py-2 flex items-center gap-1.5">
                         <Link to={`/dealer-panel/vehicles/${v._id}/edit`}>
@@ -216,6 +285,84 @@ export function AdminVehicles() {
         )}
       </div>
 
+      {saleTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md space-y-4">
+            <h2 className="text-xl font-bold text-gray-900">Complete Sale</h2>
+
+            <p className="text-sm text-gray-600">
+              {saleTarget.year} {saleTarget.make} {saleTarget.model}
+            </p>
+
+            <input
+              className="w-full border rounded p-2 text-gray-900"
+              placeholder="Final Sale Price"
+              type="number"
+              value={saleForm.soldPrice}
+              onChange={(e) =>
+                setSaleForm({
+                  ...saleForm,
+                  soldPrice: e.target.value
+                })
+              }
+            />
+
+            <input
+              className="w-full border rounded p-2 text-gray-900"
+              placeholder="Buyer Name"
+              value={saleForm.buyerName}
+              onChange={(e) =>
+                setSaleForm({
+                  ...saleForm,
+                  buyerName: e.target.value
+                })
+              }
+            />
+
+            <input
+              className="w-full border rounded p-2 text-gray-900"
+              placeholder="Buyer Phone"
+              value={saleForm.buyerPhone}
+              onChange={(e) =>
+                setSaleForm({
+                  ...saleForm,
+                  buyerPhone: e.target.value
+                })
+              }
+            />
+
+            <input
+              className="w-full border rounded p-2 text-gray-900"
+              placeholder="Buyer Email"
+              value={saleForm.buyerEmail}
+              onChange={(e) =>
+                setSaleForm({
+                  ...saleForm,
+                  buyerEmail: e.target.value
+                })
+              }
+            />
+
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                className="flex-1"
+                onClick={() => setSaleTarget(null)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                className="flex-1"
+                onClick={completeSale}
+                disabled={savingSale}
+              >
+                {savingSale ? 'Saving...' : 'Complete Sale'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}

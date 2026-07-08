@@ -6,7 +6,6 @@ const vehicleSchema = new mongoose.Schema(
     // ---------- Basic Information ----------
     title: {
       type: String,
-      required: true,
       trim: true,
       maxlength: 180
     },
@@ -27,23 +26,19 @@ const vehicleSchema = new mongoose.Schema(
     },
     make: {
       type: String,
-      required: true,
       trim: true
     },
     model: {
       type: String,
-      required: true,
       trim: true
     },
     year: {
       type: Number,
-      required: true,
       min: 1990,
       max: new Date().getFullYear() + 1
     },
     price: {
       type: Number,
-      required: true,
       min: 0
     },
     mileage: {
@@ -99,10 +94,18 @@ const vehicleSchema = new mongoose.Schema(
         fuelSystem: { type: String, trim: true }
       },
       transmission: {
-        type: { type: String, trim: true },
-        gears: { type: Number },
-        description: { type: String, trim: true }
-      },
+  type: { type: String, trim: true },
+
+  gears: {
+    type: String,
+    trim: true
+  },
+
+  description: { 
+    type: String, 
+    trim: true 
+  }
+},
       fuelEconomy: {
         cityMpg: { type: Number },
         highwayMpg: { type: Number },
@@ -197,6 +200,39 @@ const vehicleSchema = new mongoose.Schema(
     viewCount: {
       type: Number,
       default: 0
+    },
+
+    // ---------- Sale History ----------
+    soldAt: {
+      type: Date
+    },
+
+    soldBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+
+    soldPrice: {
+      type: Number,
+      min: 0
+    },
+
+    buyer: {
+      name: {
+        type: String,
+        trim: true
+      },
+
+      phone: {
+        type: String,
+        trim: true
+      },
+
+      email: {
+        type: String,
+        lowercase: true,
+        trim: true
+      }
     }
   },
   {

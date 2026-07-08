@@ -66,7 +66,7 @@ const sendOTPEmail = async ({ to, name, code, purpose }) => {
 
   await sendMail({
     to,
-    subject: `${code} — Carnex Admin ${purposeLabel} Code`,
+    subject: `Carnex Admin ${purposeLabel} Verification`,
     html
   })
 }

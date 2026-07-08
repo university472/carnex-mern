@@ -108,7 +108,7 @@ export function AdminReviews() {
               >
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-brand-secondary">
+                    <span className="font-medium text-gray-900">
                       {review.customerName}
                     </span>
                     {review.isVerifiedBuyer && (
@@ -116,7 +116,7 @@ export function AdminReviews() {
                         Verified
                       </span>
                     )}
-                    <span className="text-xs text-brand-muted">
+                    <span className="text-xs text-gray-500">
                       {review.email}
                     </span>
                   </div>
@@ -126,11 +126,11 @@ export function AdminReviews() {
                     ))}
                   </div>
                   {review.purchasedVehicle && (
-                    <p className="text-xs text-brand-muted">
+                    <p className="text-sm text-gray-600">
                       Vehicle: {review.purchasedVehicle}
                     </p>
                   )}
-                  <p className="text-sm whitespace-pre-line">
+                  <p className="text-sm whitespace-pre-line text-gray-700">
                     {review.reviewText}
                   </p>
                   {review.images?.length > 0 && (
@@ -145,7 +145,7 @@ export function AdminReviews() {
                       ))}
                     </div>
                   )}
-                  <p className="text-xs text-brand-muted">
+                  <p className="text-xs text-gray-500">
                     {formatDate(review.createdAt)}
                   </p>
                 </div>

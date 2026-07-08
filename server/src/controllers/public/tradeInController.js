@@ -39,6 +39,7 @@ const TradeInRequest = require('../../models/TradeInRequest')
 const ApiError = require('../../utils/ApiError')
 const ApiResponse = require('../../utils/ApiResponse')
 const { sendTradeInNotification } = require('../../services/emailService')
+const { createNotification } = require('../../services/notificationService')
 
 async function submitTradeInRequest(req, res, next) {
   try {
@@ -54,6 +55,12 @@ async function submitTradeInRequest(req, res, next) {
     }
 
     const requestDoc = await TradeInRequest.create(payload)
+ await createNotification({
+  title: 'New Trade-In Request',
+  message: 'Customer submitted a trade-in request',
+  type: 'trade',
+  link: `/dealer-panel/trade-in-leads/${requestDoc._id}`
+})
 
     sendTradeInNotification(requestDoc).catch(() => {})
 

@@ -1,12 +1,27 @@
 // client/src/components/layout/AdminLayout.jsx
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import api from '../../services/api'
 import { useAuth } from '../../hooks/useAuth'
 import { Button } from '../ui/Button'
+import { Bell } from 'lucide-react'
 
 const NAV = [
+  // { label: 'Dashboard', path: '/dealer-panel', end: true },
+  // { label: 'Vehicles', path: '/dealer-panel/vehicles' },
   { label: 'Dashboard', path: '/dealer-panel', end: true },
-  { label: 'Vehicles', path: '/dealer-panel/vehicles' },
+
+  { label: '— Inventory', disabled: true },
+
+  {
+    label: 'Vehicles',
+    path: '/dealer-panel/vehicles'
+  },
+
+  {
+    label: 'Sold History',
+    path: '/dealer-panel/sold-history'
+  },
   { label: '— Leads', disabled: true },
   { label: 'Financing', path: '/dealer-panel/finance-leads' },
   { label: 'Trade-In', path: '/dealer-panel/trade-in-leads' },
@@ -23,9 +38,43 @@ const NAV = [
 
 export function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [notifications, setNotifications] = useState([])
+  const [showNotifications, setShowNotifications] = useState(false)
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
+  const loadNotifications = async () => {
+    try {
+      const res = await api.get('/admin/notifications')
+
+      setNotifications(
+        (res.data.data || []).sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        )
+      )
+    } catch (err) {
+      console.log('Notification error', err)
+    }
+  }
+
+  useEffect(() => {
+    loadNotifications()
+  }, [])
+
+  const openNotification = async (item) => {
+    try {
+      await api.patch(`/admin/notifications/${item._id}/read`)
+
+      await loadNotifications()
+
+      setShowNotifications(false)
+
+      navigate(item.link)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+  const unreadCount = notifications.filter((n) => !n.isRead).length
   const handleLogout = async () => {
     await logout()
     navigate('/dealer-panel/login', { replace: true })
@@ -140,15 +189,89 @@ export function AdminLayout() {
             <span className="font-medium text-brand-secondary">
               Carnex Auto Sales — Admin
             </span>
-            {user && (
-              <span className="text-brand-muted">
-                Signed in as{' '}
-                <span className="font-medium text-brand-secondary">
-                  {user.name}
-                </span>{' '}
-                <span className="text-red-500">({user.role})</span>
-              </span>
-            )}
+            <div className="flex items-center gap-5 relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="
+  relative 
+  text-xl
+  text-gray-700
+  "
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span
+                    className="
+   absolute
+   -top-2
+   -right-3
+   bg-red-600
+   text-white
+   text-[10px]
+   rounded-full
+   px-1.5
+   "
+                  >
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div
+                  className="
+absolute
+right-20
+top-8
+w-80
+bg-white
+shadow-xl
+rounded-lg
+border
+z-50
+"
+                >
+                  <div className="p-3 font-bold text-gray-900 border-b">
+                    Notifications
+                  </div>
+
+                  {notifications.length === 0 ? (
+                    <p className="p-3 text-gray-500">No notifications</p>
+                  ) : (
+                    notifications.map((item) => (
+                      <div
+                        key={item._id}
+                        onClick={() => openNotification(item)}
+                        className={`
+p-3
+cursor-pointer
+border-b
+hover:bg-gray-100
+
+${!item.isRead ? 'bg-red-50' : ''}
+`}
+                      >
+                        <p className="font-semibold text-gray-900">
+                          {item.title}
+                        </p>
+
+                        <p className="text-xs text-gray-600">{item.message}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {user && (
+                <span className="text-brand-muted">
+                  Signed in as{' '}
+                  <span className="font-medium text-brand-secondary">
+                    {user.name}
+                  </span>{' '}
+                  <span className="text-red-500">({user.role})</span>
+                </span>
+              )}
+            </div>
           </header>
           <div className="py-4">
             <Outlet />

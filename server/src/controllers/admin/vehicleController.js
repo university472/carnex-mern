@@ -5,6 +5,7 @@ const escapeStringRegexp = require('escape-string-regexp')
 const Vehicle = require('../../models/Vehicle')
 const ApiError = require('../../utils/ApiError')
 const ApiResponse = require('../../utils/ApiResponse')
+const { decodeVin } = require('../../services/vinService')
 const { getPaginationParams } = require('../../utils/pagination')
 
 let uploadToCloudinary, deleteFromCloudinary
@@ -95,7 +96,12 @@ async function adminGetVehicles(req, res, next) {
     if (sort === 'year-asc') sortOption = { year: 1 }
 
     const [items, totalItems] = await Promise.all([
-      Vehicle.find(query).sort(sortOption).skip(skip).limit(limit).lean(),
+      Vehicle.find(query)
+        .populate('soldBy', 'name email')
+        .sort(sortOption)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
       Vehicle.countDocuments(query)
     ])
 
@@ -122,7 +128,6 @@ async function adminGetVehicles(req, res, next) {
   }
 }
 
-// GET /api/admin/vehicles/:id
 // GET /api/admin/vehicles/:id
 async function adminGetVehicleById(req, res, next) {
   try {
@@ -157,10 +162,31 @@ async function adminCreateVehicle(req, res, next) {
     uploadedImages = await processUploadedFiles(req.files)
 
     const payload = {
-      ...body,
-      year: Number(body.year),
-      price: Number(body.price),
-      mileage: body.mileage ? Number(body.mileage) : undefined
+      ...body
+    }
+
+    if (body.year !== undefined && body.year !== '') {
+      payload.year = Number(body.year)
+    }
+
+    if (body.price !== undefined && body.price !== '') {
+      payload.price = Number(body.price)
+    }
+
+    if (body.mileage !== undefined && body.mileage !== '') {
+      payload.mileage = Number(body.mileage)
+    }
+
+    // auto generate title
+    if (!payload.title) {
+      const parts = [
+        payload.year,
+        payload.make,
+        payload.model,
+        payload.specs?.trim
+      ].filter(Boolean)
+
+      payload.title = parts.join(' ')
     }
 
     // Keep existing images from body + newly uploaded ones
@@ -211,14 +237,21 @@ async function adminUpdateVehicle(req, res, next) {
     }
 
     const payload = { ...body }
-    if (body.year) payload.year = Number(body.year)
-    if (body.price) payload.price = Number(body.price)
-    if (body.mileage) payload.mileage = Number(body.mileage)
+    if (body.year !== undefined && body.year !== '') {
+      payload.year = Number(body.year)
+    }
+
+    if (body.price !== undefined && body.price !== '') {
+      payload.price = Number(body.price)
+    }
+
+    if (body.mileage !== undefined && body.mileage !== '') {
+      payload.mileage = Number(body.mileage)
+    }
 
     // Merge: keep existing images that weren't removed + add newly uploaded ones
     const existingImages = body.images || []
     payload.images = [...existingImages, ...uploadedImages]
-    // FIXED: delete removed images from Cloudinary
 
     const remainingPublicIds = payload.images.map((img) => img.publicId)
 
@@ -233,7 +266,7 @@ async function adminUpdateVehicle(req, res, next) {
       runValidators: true
     })
     if (!updated) return next(ApiError.notFound('Vehicle not found'))
-    // FIXED: delete removed images only after DB update success
+    // delete removed images only after DB update success
     if (removedImages.length && deleteFromCloudinary) {
       await Promise.all(
         removedImages.map((img) => deleteFromCloudinary(img.publicId))
@@ -261,16 +294,56 @@ async function adminUpdateVehicleStatus(req, res, next) {
     if (!validateObjectId(req.params.id)) {
       return next(ApiError.badRequest('Invalid vehicle id'))
     }
-    const { status } = req.body
+
+    const { status, soldPrice, buyer } = req.body
+
     if (!['available', 'reserved', 'sold', 'hidden'].includes(status)) {
       return next(ApiError.badRequest('Invalid status value'))
     }
-    const updated = await Vehicle.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    )
-    if (!updated) return next(ApiError.notFound('Vehicle not found'))
+
+    const updateData = {
+      status
+    }
+
+    // when vehicle sold
+    if (status === 'sold') {
+      updateData.soldAt = new Date()
+
+      updateData.soldBy = req.admin.id
+
+      if (soldPrice) {
+        updateData.soldPrice = Number(soldPrice)
+      }
+
+      if (buyer) {
+        updateData.buyer = {
+          name: buyer.name,
+          phone: buyer.phone,
+          email: buyer.email
+        }
+      }
+    }
+
+    // restore vehicle
+    if (status !== 'sold') {
+      updateData.soldAt = null
+
+      updateData.soldBy = null
+
+      updateData.soldPrice = null
+
+      updateData.buyer = null
+    }
+
+    const updated = await Vehicle.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+      runValidators: true
+    })
+
+    if (!updated) {
+      return next(ApiError.notFound('Vehicle not found'))
+    }
+
     return res.json(
       new ApiResponse(200, updated, 'Vehicle status updated successfully')
     )
@@ -299,11 +372,48 @@ async function adminSoftDeleteVehicle(req, res, next) {
   }
 }
 
+async function adminSoldVehicles(req, res, next) {
+  try {
+    const vehicles = await Vehicle.find({
+      status: 'sold'
+    })
+      .populate('soldBy', 'name email')
+      .sort({
+        soldAt: -1
+      })
+      .lean()
+
+    return res.json(new ApiResponse(200, vehicles, 'Sold vehicles fetched'))
+  } catch (err) {
+    return next(ApiError.internal(err.message))
+  }
+}
+
+async function adminDecodeVin(req, res, next) {
+  try {
+    const { vin } = req.params
+
+    if (!vin || vin.length !== 17) {
+      return next(ApiError.badRequest('Invalid VIN number'))
+    }
+
+    const vehicleData = await decodeVin(vin)
+
+    return res.json(
+      new ApiResponse(200, vehicleData, 'VIN decoded successfully')
+    )
+  } catch (err) {
+    return next(ApiError.internal(err.message))
+  }
+}
+
 module.exports = {
   adminGetVehicles,
   adminGetVehicleById,
   adminCreateVehicle,
   adminUpdateVehicle,
   adminUpdateVehicleStatus,
-  adminSoftDeleteVehicle
+  adminSoftDeleteVehicle,
+  adminSoldVehicles,
+  adminDecodeVin
 }
