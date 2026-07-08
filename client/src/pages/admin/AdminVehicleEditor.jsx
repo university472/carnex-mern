@@ -1,5 +1,5 @@
 // client/src/pages/admin/AdminVehicleEditor.jsx
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import { Input } from '../../components/ui/Input'
@@ -166,6 +166,21 @@ export function AdminVehicleEditor() {
   const [vinLoading, setVinLoading] = useState(false)
   const [fetching, setFetching] = useState(isEdit)
 
+  const previewFiles = useMemo(() => {
+    return files.map((file, index) => ({
+      id: index,
+      url: URL.createObjectURL(file),
+      file
+    }))
+  }, [files])
+
+  useEffect(() => {
+    return () => {
+      previewFiles.forEach((img) => {
+        URL.revokeObjectURL(img.url)
+      })
+    }
+  }, [previewFiles])
   // Load existing vehicle for editing
   useEffect(() => {
     if (!isEdit) return
@@ -444,10 +459,9 @@ export function AdminVehicleEditor() {
       // Append the rest of the data as a JSON string in a "data" field
       // Remove images array from payload because it will be replaced by uploaded files or kept as is
       const dataCopy = { ...payload }
-      if (files.length > 0) {
-        // If new files are uploaded, we want to replace images; send empty array to signal replacement.
-        dataCopy.images = []
-      }
+
+      // keep existing images order
+      dataCopy.images = form.images
       console.log('FINAL PAYLOAD')
       console.log(JSON.stringify(dataCopy, null, 2))
       fd.append('data', JSON.stringify(dataCopy))
@@ -1010,19 +1024,38 @@ export function AdminVehicleEditor() {
           {/* Preview of newly selected images */}
           {files.length > 0 && (
             <div className="mt-4">
-              <p className="text-sm text-brand-muted mb-2">Selected Images</p>
+              <p className="text-sm text-brand-muted mb-2">
+                New images (first image will be cover):
+              </p>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {files.map((file, index) => (
-                  <div key={index} className="border rounded overflow-hidden">
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-32 object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
+              {/* <ImageReorder
+                images={files.map((file) => ({
+                  url: URL.createObjectURL(file)
+                }))}
+                onReorder={(newOrder) => {
+                  const reorderedFiles = newOrder
+                    .map((item) =>
+                      files.find(
+                        (file) => URL.createObjectURL(file) === item.url
+                      )
+                    )
+                    .filter(Boolean)
+
+                  setFiles(reorderedFiles)
+                }}
+                onRemove={(index) => {
+                  setFiles((prev) => prev.filter((_, i) => i !== index))
+                }}
+              /> */}
+              <ImageReorder
+                images={previewFiles}
+                onReorder={(newOrder) => {
+                  setFiles(newOrder.map((item) => item.file))
+                }}
+                onRemove={(index) => {
+                  setFiles((prev) => prev.filter((_, i) => i !== index))
+                }}
+              />
             </div>
           )}
 
