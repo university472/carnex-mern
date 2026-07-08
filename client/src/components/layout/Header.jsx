@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { DEALERSHIP } from '../../constants'
-import logo from '../../assets/logo1.png'
+import logo from '../../assets/logo.png'
 
 // ── Icons (inline SVG, no dependency needed) ──────────────────
 function PhoneIcon() {

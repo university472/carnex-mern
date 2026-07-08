@@ -1,4 +1,3 @@
-// server/src/models/Settings.js
 const mongoose = require('mongoose')
 
 const { Schema } = mongoose
