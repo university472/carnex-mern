@@ -1,5 +1,5 @@
 // client/src/pages/public/VehicleDetail.jsx
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useVehicleById, useLatestVehicles } from '../../hooks/useVehicles'
 import { PaymentCalculator } from '../../components/vehicles/PaymentCalculator'
@@ -90,107 +90,576 @@ const Icon = {
         strokeLinecap="round"
       />
     </svg>
+  ),
+  pin: (p) => (
+    <svg viewBox="0 0 24 24" fill="none" className={p.className}>
+      <path
+        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  ),
+  fullscreen: (p) => (
+    <svg viewBox="0 0 24 24" fill="none" className={p.className}>
+      <path
+        d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+  chevronLeft: (p) => (
+    <svg viewBox="0 0 24 24" fill="none" className={p.className}>
+      <path
+        d="M15 18l-6-6 6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+  chevronRight: (p) => (
+    <svg viewBox="0 0 24 24" fill="none" className={p.className}>
+      <path
+        d="M9 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 
-// ── Lightbox Modal ────────────────────────────────────
-function Lightbox({ src, onClose }) {
+// ── Fullscreen Lightbox Modal with Touch Swipe & Pinch-to-Zoom ────────
+function FullscreenGallery({ images, initialIndex, onClose }) {
+  const [currentIndex, setCurrentIndex] = useState(initialIndex)
+  const [scale, setScale] = useState(1)
+  const [translate, setTranslate] = useState({ x: 0, y: 0 })
+  const [isZoomed, setIsZoomed] = useState(false)
+
+  const touchStartX = useRef(null)
+  const touchStartY = useRef(null)
+  const pinchStartDist = useRef(null)
+  const pinchStartScale = useRef(1)
+  const lastPanPoint = useRef(null)
+  const swipeOffset = useRef(0)
+  const [isSwiping, setIsSwiping] = useState(false)
+  const [swipeX, setSwipeX] = useState(0)
+
+  const total = images.length
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
+
+  // Reset zoom on image change
+  useEffect(() => {
+    setScale(1)
+    setTranslate({ x: 0, y: 0 })
+    setIsZoomed(false)
+    setSwipeX(0)
+  }, [currentIndex])
+
+  const goTo = useCallback((index) => {
+    setCurrentIndex(index)
+  }, [])
+
+  const goToPrev = useCallback(() => {
+    setCurrentIndex((prev) => (prev === 0 ? total - 1 : prev - 1))
+  }, [total])
+
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev === total - 1 ? 0 : prev + 1))
+  }, [total])
+
+  // Preload neighbors
+  useEffect(() => {
+    if (total <= 1) return
+    const nextIdx = currentIndex === total - 1 ? 0 : currentIndex + 1
+    const prevIdx = currentIndex === 0 ? total - 1 : currentIndex - 1
+    ;[nextIdx, prevIdx].forEach((idx) => {
+      const img = new Image()
+      img.src = images[idx]
+    })
+  }, [currentIndex, images, total])
+
+  const getDistance = (touches) => {
+    const [a, b] = touches
+    return Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY)
+  }
+
+  const clampTranslate = (t, s) => {
+    // Limit panning when zoomed
+    const maxX = (s - 1) * 150
+    const maxY = (s - 1) * 100
+    return {
+      x: Math.max(-maxX, Math.min(maxX, t.x)),
+      y: Math.max(-maxY, Math.min(maxY, t.y))
+    }
+  }
+
+  // Touch handlers
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      pinchStartDist.current = getDistance(e.touches)
+      pinchStartScale.current = scale
+      return
+    }
+
+    if (isZoomed) {
+      lastPanPoint.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      }
+      return
+    }
+
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+    setIsSwiping(true)
+    swipeOffset.current = 0
+  }
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault()
+      if (pinchStartDist.current == null) return
+      const newDist = getDistance(e.touches)
+      const ratio = newDist / pinchStartDist.current
+      const newScale = Math.min(4, Math.max(1, pinchStartScale.current * ratio))
+      setScale(newScale)
+      setIsZoomed(newScale > 1.05)
+      return
+    }
+
+    if (isZoomed && lastPanPoint.current) {
+      e.preventDefault()
+      const dx = e.touches[0].clientX - lastPanPoint.current.x
+      const dy = e.touches[0].clientY - lastPanPoint.current.y
+      lastPanPoint.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      }
+      setTranslate((prev) =>
+        clampTranslate({ x: prev.x + dx, y: prev.y + dy }, scale)
+      )
+      return
+    }
+
+    if (!isSwiping || touchStartX.current === null || isZoomed) return
+
+    const currentX = e.touches[0].clientX
+    const currentY = e.touches[0].clientY
+    const diffX = currentX - touchStartX.current
+    const diffY = currentY - touchStartY.current
+
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      e.preventDefault()
+      const resistance = 0.6
+      if (
+        (currentIndex === 0 && diffX > 0) ||
+        (currentIndex === total - 1 && diffX < 0)
+      ) {
+        swipeOffset.current = diffX * resistance * 0.25
+      } else {
+        swipeOffset.current = diffX * resistance
+      }
+      setSwipeX(swipeOffset.current)
+    }
+  }
+
+  const handleTouchEnd = (e) => {
+    if (pinchStartDist.current != null && e.touches.length < 2) {
+      pinchStartDist.current = null
+      if (scale < 1.05) {
+        setScale(1)
+        setTranslate({ x: 0, y: 0 })
+        setIsZoomed(false)
+      }
+      return
+    }
+
+    if (isZoomed) {
+      lastPanPoint.current = null
+      return
+    }
+
+    if (touchStartX.current === null) return
+
+    const diffX = e.changedTouches[0].clientX - touchStartX.current
+    const diffY = e.changedTouches[0].clientY - touchStartY.current
+
+    if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 120) {
+      onClose()
+    } else if (Math.abs(diffX) > 50) {
+      if (diffX > 0) goToPrev()
+      else goToNext()
+    }
+
+    setIsSwiping(false)
+    setSwipeX(0)
+    touchStartX.current = null
+    touchStartY.current = null
+  }
+
+  // Double-tap to zoom
+  const lastTapRef = useRef(0)
+  const handleImageDoubleTap = (e) => {
+    e.stopPropagation()
+    const now = Date.now()
+    if (now - lastTapRef.current < 300) {
+      if (isZoomed) {
+        setScale(1)
+        setTranslate({ x: 0, y: 0 })
+        setIsZoomed(false)
+      } else {
+        setScale(2.5)
+        setIsZoomed(true)
+      }
+    }
+    lastTapRef.current = now
+  }
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKey = (e) => {
+      switch (e.key) {
+        case 'Escape':
+          onClose()
+          break
+        case 'ArrowLeft':
+          if (!isZoomed) goToPrev()
+          break
+        case 'ArrowRight':
+          if (!isZoomed) goToNext()
+          break
+        case '+':
+        case '=':
+          setScale((s) => Math.min(4, s + 0.5))
+          setIsZoomed(true)
+          break
+        case '-':
+          setScale((s) => {
+            const ns = Math.max(1, s - 0.5)
+            if (ns <= 1.05) setIsZoomed(false)
+            return ns
+          })
+          break
+        default:
+          break
+      }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [onClose, goToPrev, goToNext, isZoomed])
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 p-4 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]"
+      className="fixed inset-0 z-[9999] bg-black/98 flex items-center justify-center"
       onClick={onClose}
     >
+      {/* Close button */}
+      {/* Close button - IMPROVED VISIBILITY */}
       <button
-        className="absolute top-5 right-6 text-white/80 text-3xl leading-none hover:text-white transition-colors"
+        className="
+    absolute top-4 right-4 z-10 
+    w-12 h-12 
+    rounded-full 
+    bg-black/60 backdrop-blur-md 
+    border-2 border-white/30
+    text-white 
+    text-2xl font-bold
+    flex items-center justify-center
+    hover:bg-black/80 hover:scale-110
+    active:scale-95
+    transition-all duration-200
+    shadow-lg shadow-black/30
+  "
         onClick={onClose}
         aria-label="Close"
       >
-        &times;
+        <span className="leading-none">✕</span>
       </button>
-      <img
-        src={src}
-        className="max-w-[90%] max-h-[85vh] object-contain rounded-xl shadow-[0_20px_80px_rgba(0,0,0,0.6)]"
-        alt="expanded vehicle"
+
+      {/* Counter */}
+      <div className="absolute top-4 left-4 z-10 rounded-full bg-black/60 backdrop-blur-md px-4 py-2 text-white text-sm font-bold border border-white/20">
+        {currentIndex + 1} / {total}
+      </div>
+
+      {/* Navigation arrows - hidden on mobile (swipe instead) */}
+      {total > 1 && !isZoomed && (
+        <>
+          {/* Left Arrow - Previous */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              goToPrev()
+            }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-12 h-12 rounded-full bg-black/50 backdrop-blur hover:bg-black/70 transition-all text-white border border-white/20"
+            aria-label="Previous"
+          >
+            <Icon.chevronLeft className="w-6 h-6" />
+          </button>
+
+          {/* Right Arrow - Next */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              goToNext()
+            }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-12 h-12 rounded-full bg-black/50 backdrop-blur hover:bg-black/70 transition-all text-white border border-white/20"
+            aria-label="Next"
+          >
+            <Icon.chevronRight className="w-6 h-6" />
+          </button>
+        </>
+      )}
+
+      {/* Main image container */}
+      <div
+        className="w-full h-full flex items-center justify-center px-4 md:px-20"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         onClick={(e) => e.stopPropagation()}
-      />
-      <p className="absolute bottom-6 text-slate-400 text-[11px] uppercase tracking-[0.25em]">
-        Click anywhere to close
-      </p>
-    </div>
-  )
-}
-
-// ── Mosaic gallery — luxury showcase treatment ───────
-function MosaicGallery({ images, title }) {
-  const [selected, setSelected] = useState(0)
-  const [lightbox, setLightbox] = useState(false)
-
-  if (!images.length) return null
-
-  const main = images[selected] || images[0]
-  const thumbs = images.slice(0, 4)
-  const remaining = images.length - 1
-
-  return (
-    <>
-      <div className="rounded-3xl overflow-hidden bg-white shadow-[0_8px_40px_rgba(15,23,42,0.08)] border border-slate-100">
+      >
         <div
-          className="relative cursor-zoom-in group overflow-hidden"
-          onClick={() => setLightbox(true)}
+          className="overflow-hidden"
+          style={{
+            transform: isSwiping ? `translateX(${swipeX}px)` : 'none',
+            transition: isSwiping
+              ? 'none'
+              : 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+          }}
         >
           <img
-            src={main}
-            alt={title}
-            className="w-full aspect-[16/10] object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
-            loading="lazy"
+            src={images[currentIndex]}
+            alt={`Vehicle image ${currentIndex + 1}`}
+            className="max-h-[85vh] max-w-[90vw] object-contain select-none rounded-lg"
+            draggable={false}
+            onClick={handleImageDoubleTap}
+            onError={(e) => {
+              e.currentTarget.src =
+                'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=800'
+            }}
+            style={{
+              transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)`,
+              transition: pinchStartDist.current
+                ? 'none'
+                : 'transform 0.3s ease-out',
+              cursor: isZoomed ? 'grab' : scale > 1 ? 'zoom-out' : 'zoom-in'
+            }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/25 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <span className="absolute bottom-4 right-4 rounded-full bg-slate-950/70 text-white text-[11px] font-semibold uppercase tracking-wider px-3 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
-            View Full Size
-          </span>
         </div>
-        <div className="grid grid-cols-4 gap-2 p-2">
-          {thumbs.map((src, i) => (
+      </div>
+
+      {/* Bottom indicators */}
+      {total > 1 && !isZoomed && (
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          {images.map((_, idx) => (
             <button
-              key={i}
-              type="button"
-              onClick={() => setSelected(i)}
-              className={`relative overflow-hidden rounded-xl transition-all duration-200 ${
-                selected === i
-                  ? 'ring-2 ring-red-600 ring-offset-2 ring-offset-white'
-                  : 'ring-1 ring-slate-100 hover:ring-slate-300'
+              key={idx}
+              onClick={(e) => {
+                e.stopPropagation()
+                goTo(idx)
+              }}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                currentIndex === idx
+                  ? 'w-8 bg-white'
+                  : 'w-2 bg-white/40 hover:bg-white/60'
+              }`}
+              aria-label={`Go to image ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Zoom indicator */}
+      {isZoomed && (
+        <div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 
+     rounded-full bg-black/60 backdrop-blur-md    ✅ Dark background
+     px-4 py-2 text-white/90 text-xs z-10 
+     border border-white/20"
+        >
+          {' '}
+          ✅ Border for visibility Pinch to adjust zoom · Double-tap to reset
+        </div>
+      )}
+
+      {/* Thumbnail strip at bottom */}
+      {total > 4 && !isZoomed && (
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-1.5 overflow-x-auto max-w-[80vw] px-4 pb-2 z-10">
+          {images.map((src, idx) => (
+            <button
+              key={idx}
+              onClick={(e) => {
+                e.stopPropagation()
+                goTo(idx)
+              }}
+              className={`flex-shrink-0 w-12 h-10 rounded-md overflow-hidden border-2 transition-all ${
+                currentIndex === idx
+                  ? 'border-white opacity-100'
+                  : 'border-transparent opacity-50 hover:opacity-80'
               }`}
             >
               <img
                 src={src}
-                alt={`thumb ${i + 1}`}
-                className={`w-full h-20 object-cover transition-opacity duration-200 ${
-                  selected === i
-                    ? 'opacity-100'
-                    : 'opacity-70 hover:opacity-100'
-                }`}
-                loading="lazy"
+                alt=""
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src =
+                    'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=800'
+                }}
               />
-              {i === 3 && remaining > 4 && (
-                <span
-                  className="absolute inset-0 flex items-center justify-center bg-slate-950/55 text-white text-sm font-bold cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setLightbox(true)
-                  }}
-                >
-                  +{remaining - 3}
-                </span>
-              )}
             </button>
           ))}
-          {thumbs.length < 4 &&
-            Array.from({ length: 4 - thumbs.length }).map((_, i) => (
-              <div key={`ph-${i}`} className="h-20 bg-slate-50 rounded-xl" />
-            ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Premium Vertical Gallery - All images in scrollable column ───────
+function PremiumGallery({ images, title }) {
+  const [fullscreenIndex, setFullscreenIndex] = useState(null)
+  const [loadedImages, setLoadedImages] = useState({})
+  const scrollContainerRef = useRef(null)
+
+  const handleImageLoad = (index) => {
+    setLoadedImages((prev) => ({ ...prev, [index]: true }))
+  }
+
+  if (!images.length) {
+    return (
+      <div className="rounded-3xl overflow-hidden bg-slate-100 aspect-[16/9] flex items-center justify-center">
+        <div className="text-center">
+          <Icon.gauge className="h-10 w-10 text-slate-400 mx-auto mb-2" />
+          <p className="text-slate-500 text-sm font-medium">
+            No images available
+          </p>
         </div>
       </div>
-      {lightbox && <Lightbox src={main} onClose={() => setLightbox(false)} />}
+    )
+  }
+
+  return (
+    <>
+      <div className="rounded-3xl overflow-hidden bg-white shadow-[0_8px_40px_rgba(15,23,42,0.08)] border border-slate-100">
+        {/* Hero first image - takes full width with swipe hint */}
+        <div
+          className="relative overflow-hidden cursor-pointer group"
+          onClick={() => setFullscreenIndex(0)}
+        >
+          <img
+            src={images[0]}
+            alt={`${title} - Main`}
+            className="w-full aspect-[16/9] md:aspect-[16/8] object-cover transition-transform duration-700 group-hover:scale-105"
+            loading="eager"
+            onError={(e) => {
+              e.currentTarget.src =
+                'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=800'
+            }}
+            onLoad={() => handleImageLoad(0)}
+          />
+
+          {/* Fullscreen button overlay */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center">
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60 backdrop-blur-sm rounded-full p-3">
+              <Icon.fullscreen className="h-6 w-6 text-white" />
+            </span>
+          </div>
+
+          {/* Image counter badge */}
+          {images.length > 1 && (
+            <div className="absolute top-4 right-4 rounded-full bg-black/60 backdrop-blur-sm px-3 py-1.5 text-white text-xs font-bold">
+              1 / {images.length}
+            </div>
+          )}
+
+          {/* Swipe indicator - mobile only */}
+          {images.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:hidden flex items-center gap-1.5 rounded-full bg-black/50 backdrop-blur-sm px-3 py-1.5 text-white/70 text-[10px] uppercase tracking-wider">
+              <span>Swipe to see all</span>
+              <Icon.chevronRight className="h-3 w-3" />
+            </div>
+          )}
+        </div>
+
+        {/* All images in a scrollable vertical grid */}
+        <div
+          ref={scrollContainerRef}
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 p-3 max-h-[600px] overflow-y-auto scrollbar-thin"
+        >
+          {images.map((src, index) => (
+            <div
+              key={index}
+              className={`relative overflow-hidden rounded-xl cursor-pointer group ${
+                index === 0 ? 'hidden' : '' // Hide first image as it's shown above
+              }`}
+              onClick={() => setFullscreenIndex(index)}
+            >
+              {/* Skeleton loader */}
+              {!loadedImages[index] && (
+                <div className="absolute inset-0 bg-slate-200 animate-pulse" />
+              )}
+
+              <img
+                src={src}
+                alt={`${title} - ${index + 1}`}
+                className="w-full aspect-[4/3] object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
+                loading="lazy"
+                onLoad={() => handleImageLoad(index)}
+                onError={(e) => {
+                  e.currentTarget.src =
+                    'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=800'
+                }}
+              />
+
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-3">
+                <span className="text-white text-xs font-bold">
+                  {index + 1}
+                </span>
+                <Icon.fullscreen className="h-4 w-4 text-white" />
+              </div>
+
+              {/* Active indicator ring */}
+              <div className="absolute inset-0 ring-2 ring-inset ring-transparent group-hover:ring-white/30 rounded-xl transition-all duration-300" />
+            </div>
+          ))}
+        </div>
+
+        {/* View all photos button */}
+        <div className="px-3 pb-3">
+          <button
+            onClick={() => setFullscreenIndex(0)}
+            className="w-full py-3 rounded-xl border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all text-sm font-bold text-slate-700 flex items-center justify-center gap-2 group"
+          >
+            <Icon.fullscreen className="h-4 w-4 group-hover:scale-110 transition-transform" />
+            View all {images.length} photos
+          </button>
+        </div>
+      </div>
+
+      {/* Fullscreen lightbox */}
+      {fullscreenIndex !== null && (
+        <FullscreenGallery
+          images={images}
+          initialIndex={fullscreenIndex}
+          onClose={() => setFullscreenIndex(null)}
+        />
+      )}
     </>
   )
 }
@@ -262,12 +731,17 @@ const Card = ({ children, className = '' }) => (
   </div>
 )
 
+// ── Main VehicleDetail Component ──────────────────────
 export function VehicleDetail() {
-  const [showContactForm, setShowContactForm] = useState(false)
   const { id } = useParams()
   const { vehicle, loading, error } = useVehicleById(id)
   const { vehicles: latestVehicles, loading: relatedLoading } =
     useLatestVehicles(6)
+
+  // 🔼 Scroll to top when the detail page mounts
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   if (loading) {
     return (
@@ -352,7 +826,8 @@ export function VehicleDetail() {
   const salePrice = badges.salePrice || vehicle.salePrice
   const showSale = salePrice && salePrice < price
   const isSold = vehicle.status === 'sold'
-  // ── Build spec columns (same data as before) ────────
+
+  // ── Build spec columns ────────
   const engineSpecs = specs.engine || {}
   const engineCols = [
     [
@@ -478,18 +953,7 @@ export function VehicleDetail() {
             </p>
           </div>
           {isSold ? (
-            <span
-              className="
-      rounded-full
-      bg-red-600
-      px-5
-      py-2
-      text-sm
-      font-black
-      text-white
-      tracking-widest
-    "
-            >
+            <span className="rounded-full bg-red-600 px-5 py-2 text-sm font-black text-white tracking-widest">
               SOLD
             </span>
           ) : (
@@ -502,14 +966,14 @@ export function VehicleDetail() {
       <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)] items-start">
         {/* Left column */}
         <div className="space-y-8">
-          {/* Gallery */}
-          <MosaicGallery images={galleryImages} title={title} />
+          {/* 🔥 NEW Premium Gallery */}
+          <PremiumGallery images={galleryImages} title={title} />
+
           {media?.videoUrl && (
             <Card className="p-4">
               <SectionHeading eyebrow="Walkaround">
                 Vehicle Video
               </SectionHeading>
-
               <div className="mt-4 aspect-video overflow-hidden rounded-xl">
                 <iframe
                   src={
@@ -561,7 +1025,7 @@ export function VehicleDetail() {
                   Was <span className="line-through">{fmtCur(price)}</span>
                 </p>
               )}
-              <span className="text-4xl font-black text-red-600 tracking-tight">
+              <span className="text-5xl font-black text-slate-900 tracking-tight">
                 {fmtCur(showSale ? salePrice : price)}
               </span>
             </div>
@@ -734,11 +1198,9 @@ export function VehicleDetail() {
           {isSold ? (
             <Card className="p-6 text-center">
               <h3 className="text-xl font-black text-red-600">SOLD VEHICLE</h3>
-
               <p className="mt-2 text-sm text-slate-600">
                 This vehicle has been sold. Please check our latest inventory.
               </p>
-
               <Link to="/inventory">
                 <Button className="mt-4 w-full">View Available Cars</Button>
               </Link>
@@ -748,12 +1210,12 @@ export function VehicleDetail() {
               <Card className="p-5" id="quote-form">
                 <QuoteForm vehicle={vehicle} />
               </Card>
-
               <Card className="p-5">
                 <PaymentCalculator price={salePrice || price} />
               </Card>
             </>
           )}
+
           <div className="rounded-2xl bg-slate-900 px-5 py-4 flex items-center gap-3">
             <Icon.shield className="h-6 w-6 text-red-500 flex-shrink-0" />
             <p className="text-xs text-slate-300 leading-snug">

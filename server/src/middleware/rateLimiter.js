@@ -30,9 +30,11 @@ const authLimiter = rateLimit({
 
 const formLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: 100,
+
   standardHeaders: true,
   legacyHeaders: false,
+
   message: {
     success: false,
     message: 'Too many submissions from this IP, please try again later.'

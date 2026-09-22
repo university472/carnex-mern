@@ -7,6 +7,7 @@ export function Select({
   options,
   placeholder = 'Select…',
   className,
+  error, // 🔥 NEW
   ...props
 }) {
   return (
@@ -14,7 +15,10 @@ export function Select({
       {label && (
         <label
           htmlFor={id}
-          className="text-xs font-medium text-brand-secondary"
+          className={clsx(
+            'text-xs font-medium',
+            error ? 'text-red-600' : 'text-brand-secondary'
+          )}
         >
           {label}
         </label>
@@ -22,17 +26,15 @@ export function Select({
       <select
         id={id}
         className={clsx(
-          'block w-full rounded-md border border-brand-border bg-white px-3 py-2 text-sm text-brand-text shadow-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary',
+          'block w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm focus:ring-1',
+          error
+            ? 'border-red-300 text-red-900 focus:border-red-500 focus:ring-red-500'
+            : 'border-brand-border text-brand-text focus:border-brand-primary focus:ring-brand-primary',
           className
         )}
         {...props}
       >
         <option value="">{placeholder}</option>
-        {/* {options?.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))} */}
         {options?.map((opt) => {
           if (typeof opt === 'string') {
             return (
@@ -41,7 +43,6 @@ export function Select({
               </option>
             )
           }
-
           return (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -49,6 +50,7 @@ export function Select({
           )
         })}
       </select>
+      {error && <p className="text-[11px] text-red-600 mt-1">{error}</p>}
     </div>
   )
 }

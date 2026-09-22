@@ -131,7 +131,9 @@ export function VehicleCard({ vehicle }) {
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="space-y-0.5">
             <p className="text-brand-muted">Price</p>
-            <p className="font-semibold text-brand-primary">{formattedPrice}</p>
+            <p className="text-brand-secondary text-2xl font-extrabold tracking-tight">
+              {formattedPrice}
+            </p>
           </div>
           <div className="space-y-0.5">
             <p className="text-brand-muted">Mileage</p>

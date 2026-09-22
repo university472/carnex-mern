@@ -22,7 +22,7 @@ const initialFilters = {
   make: '',
   model: '',
   priceMin: '',
-  priceMax: '',
+  priceMax: '', // ✅ Fixed: Consistent naming with priceMax
   yearMin: '',
   yearMax: '',
   bodyType: '',
@@ -33,6 +33,11 @@ const initialFilters = {
 
 export function Inventory() {
   const location = useLocation()
+
+  // ===== 🔼 SCROLL TO TOP ON MOUNT =====
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   const [vehicles, setVehicles] = useState([])
   const [pagination, setPagination] = useState({
@@ -60,7 +65,7 @@ export function Inventory() {
       ...prev,
       make: params.get('make') || '',
       bodyType: params.get('bodyType') || '',
-      priceMax: params.get('maxPrice') || '',
+      priceMax: params.get('maxPrice') || '', // ✅ Fixed: Map 'maxPrice' from URL to 'priceMax' in state
       yearMin: params.get('minYear') || ''
     }))
     setPage(1)
@@ -80,8 +85,8 @@ export function Inventory() {
       if (searchQuery.trim()) params.search = searchQuery.trim()
       if (filters.make) params.make = filters.make
       if (filters.model) params.model = filters.model
-      if (filters.priceMin) params.minPrice = filters.priceMin
-      if (filters.priceMax) params.maxPrice = filters.priceMax
+      if (filters.priceMin) params.minPrice = filters.priceMin // ✅ Send as minPrice to API
+      if (filters.priceMax) params.maxPrice = filters.priceMax // ✅ Send as maxPrice to API
       if (filters.yearMin) params.minYear = filters.yearMin
       if (filters.yearMax) params.maxYear = filters.yearMax
       if (filters.bodyType) params.bodyType = filters.bodyType
@@ -247,9 +252,7 @@ export function Inventory() {
                       {pagination.total}
                     </span>{' '}
                     vehicle{pagination.total !== 1 ? 's' : ''}
-                    {searchQuery && (
-                      <> matching &quot;{searchQuery}&quot;</>
-                    )}
+                    {searchQuery && <> matching &quot;{searchQuery}&quot;</>}
                   </>
                 )}
               </p>
@@ -258,11 +261,7 @@ export function Inventory() {
 
           {/* ── Vehicle grid ────────────────────────────────── */}
           {!error && (
-            <VehicleGrid
-              vehicles={vehicles}
-              view={view}
-              loading={loading}
-            />
+            <VehicleGrid vehicles={vehicles} view={view} loading={loading} />
           )}
 
           {/* ── Pagination ──────────────────────────────────── */}

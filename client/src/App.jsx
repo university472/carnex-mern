@@ -34,10 +34,12 @@ import { AdminAuditLogs } from './pages/admin/AdminAuditLogs'
 import { AdminSettings } from './pages/admin/AdminSettings'
 import { AdminUsers } from './pages/admin/AdminUsers'
 import { AdminAnalytics } from './pages/admin/AdminAnalytics'
+import { ScrollToTop } from './components/ScrollToTop'
 
 export function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AdminSessionWatcher />
 
       <Routes>

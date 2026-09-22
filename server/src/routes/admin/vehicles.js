@@ -22,7 +22,7 @@ const {
 let uploadMiddleware
 try {
   const { upload } = require('../../middleware/upload')
-  uploadMiddleware = upload.array('images', 10)
+  uploadMiddleware = upload.array('images', 25)
 } catch {
   uploadMiddleware = (req, _res, next) => next()
 }

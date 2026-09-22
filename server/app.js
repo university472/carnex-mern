@@ -44,6 +44,7 @@ const {
 } = require('./src/middleware/errorHandler')
 const ApiResponse = require('./src/utils/ApiResponse')
 const { API_PREFIX } = require('./src/config/constants')
+console.log('API PREFIX:', API_PREFIX)
 
 const app = express()
 app.set('trust proxy', 1)

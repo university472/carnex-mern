@@ -33,7 +33,7 @@ export function TradeInForm() {
   const [serverError, setServerError] = useState('')
 
   // Authorization state
-  const [consentAccepted, setConsentAccepted] = useState(false)
+  const [consentAccepted, setConsentAccepted] = useState(false)  
 
   const [form, setForm] = useState(emptyForm)
 

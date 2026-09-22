@@ -24,20 +24,21 @@ const createPendingToken = (userId) =>
 // ── POST /api/admin/auth/login ────────────────────────────────
 async function login(req, res, next) {
   try {
-
-    const { email = '', password = '' } = req.body  
-
+    const { email = '', password = '' } = req.body
     const normalizedEmail = email.toLowerCase().trim()
 
-    const user = await User.findOne({
-      email: normalizedEmail
-    }).select('+password')
+    console.log('Login Email:', normalizedEmail)
+
+    const user = await User.findOne({ email: normalizedEmail }).select(
+      '+password'
+    )
+    console.log('User Found:', !!user)
 
     if (!user || !user.isActive) {
       return next(new ApiError(401, 'Invalid credentials'))
     }
 
-    // Check account lock
+    // Check account lock BEFORE password comparison
     if (user.isLocked) {
       return next(
         new ApiError(
@@ -48,6 +49,7 @@ async function login(req, res, next) {
     }
 
     const isMatch = await user.comparePassword(password)
+    console.log('Password Match:', isMatch)
 
     if (!isMatch) {
       await user.incrementLoginAttempts()
@@ -59,7 +61,6 @@ async function login(req, res, next) {
 
     // Generate OTP and send to admin email
     const code = await OTP.generateFor(user._id, 'login')
-
     await sendOTPEmail({
       to: user.email,
       name: user.name,

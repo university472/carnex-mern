@@ -1,3 +1,4 @@
+// client/src/components/ui/Input.jsx
 import clsx from 'clsx'
 
 export function Input({
@@ -7,6 +8,7 @@ export function Input({
   type = 'text',
   className,
   helperText,
+  error, // 🔥 NEW: error prop
   textarea = false,
   ...props
 }) {
@@ -16,7 +18,10 @@ export function Input({
       {label && (
         <label
           htmlFor={inputId}
-          className="text-xs font-medium text-brand-secondary"
+          className={clsx(
+            'text-xs font-medium',
+            error ? 'text-red-600' : 'text-brand-secondary'
+          )}
         >
           {label}
         </label>
@@ -28,7 +33,10 @@ export function Input({
           name={name}
           rows={4}
           className={clsx(
-            'block w-full rounded-md border border-brand-border bg-white px-3 py-2 text-sm text-brand-text shadow-sm placeholder:text-brand-muted focus:border-brand-primary focus:ring-1 focus:ring-brand-primary resize-y',
+            'block w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm placeholder:text-brand-muted focus:ring-1 resize-y',
+            error
+              ? 'border-red-300 text-red-900 focus:border-red-500 focus:ring-red-500'
+              : 'border-brand-border text-brand-text focus:border-brand-primary focus:ring-brand-primary',
             className
           )}
           {...props}
@@ -39,14 +47,20 @@ export function Input({
           name={name}
           type={type}
           className={clsx(
-            'block w-full rounded-md border border-brand-border bg-white px-3 py-2 text-sm text-brand-text shadow-sm placeholder:text-brand-muted focus:border-brand-primary focus:ring-1 focus:ring-brand-primary',
+            'block w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm placeholder:text-brand-muted focus:ring-1',
+            error
+              ? 'border-red-300 text-red-900 focus:border-red-500 focus:ring-red-500'
+              : 'border-brand-border text-brand-text focus:border-brand-primary focus:ring-brand-primary',
             className
           )}
           {...props}
         />
       )}
 
-      {helperText && <p className="text-xs text-brand-muted">{helperText}</p>}
+      {error && <p className="text-[11px] text-red-600 mt-1">{error}</p>}
+      {!error && helperText && (
+        <p className="text-xs text-brand-muted">{helperText}</p>
+      )}
     </div>
   )
 }

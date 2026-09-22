@@ -1,4 +1,3 @@
-// server/src/controllers/admin/vehicleController.js
 const mongoose = require('mongoose')
 const { validationResult } = require('express-validator')
 const escapeStringRegexp = require('escape-string-regexp')
@@ -165,6 +164,17 @@ async function adminCreateVehicle(req, res, next) {
       ...body
     }
 
+    // ===== AUTO-FILL TOP-LEVEL transmission FROM specs.transmission.type =====
+    if (!payload.transmission && payload.specs?.transmission?.type) {
+      payload.transmission = payload.specs.transmission.type
+    }
+
+    // ===== 🔥 NEW: AUTO-FILL TOP-LEVEL fuelType FROM specs.fuelType =====
+    if (!payload.fuelType && payload.specs?.fuelType) {
+      payload.fuelType = payload.specs.fuelType
+    }
+    // ===== END AUTO-FILL =====
+
     if (body.year !== undefined && body.year !== '') {
       payload.year = Number(body.year)
     }
@@ -237,6 +247,18 @@ async function adminUpdateVehicle(req, res, next) {
     }
 
     const payload = { ...body }
+
+    // ===== AUTO-FILL TOP-LEVEL transmission FROM specs.transmission.type =====
+    if (!payload.transmission && payload.specs?.transmission?.type) {
+      payload.transmission = payload.specs.transmission.type
+    }
+
+    // ===== 🔥 NEW: AUTO-FILL TOP-LEVEL fuelType FROM specs.fuelType =====
+    if (!payload.fuelType && payload.specs?.fuelType) {
+      payload.fuelType = payload.specs.fuelType
+    }
+    // ===== END AUTO-FILL =====
+
     if (body.year !== undefined && body.year !== '') {
       payload.year = Number(body.year)
     }
@@ -389,6 +411,7 @@ async function adminSoldVehicles(req, res, next) {
   }
 }
 
+// ===== 🔥 COMPLETELY UPDATED: VIN DECODE FUNCTION =====
 async function adminDecodeVin(req, res, next) {
   try {
     const { vin } = req.params
@@ -398,6 +421,22 @@ async function adminDecodeVin(req, res, next) {
     }
 
     const vehicleData = await decodeVin(vin)
+
+    // ===== 🔥 NEW: Map transmission type to top-level field =====
+    if (vehicleData.specs?.transmission?.type) {
+      vehicleData.transmission = vehicleData.specs.transmission.type
+    }
+
+    // ===== 🔥 NEW: Map fuel type to top-level field =====
+    if (vehicleData.specs?.fuelType) {
+      vehicleData.fuelType = vehicleData.specs.fuelType
+    }
+
+    // ===== 🔥 NEW: Ensure bodyType is mapped correctly =====
+    if (vehicleData.bodyType && !vehicleData.specs?.bodyType) {
+      if (!vehicleData.specs) vehicleData.specs = {}
+      vehicleData.specs.bodyType = vehicleData.bodyType
+    }
 
     return res.json(
       new ApiResponse(200, vehicleData, 'VIN decoded successfully')

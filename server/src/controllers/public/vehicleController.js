@@ -1,13 +1,19 @@
-// server/src/controllers/public/vehicleController.js
 const mongoose = require('mongoose')
-const escapeStringRegexp = require('escape-string-regexp')
 const Vehicle = require('../../models/Vehicle')
 const ApiError = require('../../utils/ApiError')
 const ApiResponse = require('../../utils/ApiResponse')
 
 /**
+ * Helper: builds a case‑insensitive, escaped regex from user input
+ */
+function safeRegex(value) {
+  const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(escaped, 'i')
+}
+
+/**
  * GET /api/vehicles
- * Public inventory list with filters + pagination
+ * Public inventory list with filters, search, sorting & pagination
  */
 async function getVehicles(req, res, next) {
   try {
@@ -34,17 +40,23 @@ async function getVehicles(req, res, next) {
     const skip = (pageNum - 1) * limitNum
 
     const filter = {
-      status: {
-        $in: ['available', 'sold']
-      }
+      status: { $in: ['available', 'sold'] }
     }
 
-    if (make) filter.make = safeRegex(make)
+    // ── Exact‑match filters ────────────────────────────────
+    if (make) {
+      filter.make = { $regex: `^${make}$`, $options: 'i' }
+    }
     if (model) filter.model = safeRegex(model)
-    if (bodyType) filter.bodyType = safeRegex(bodyType)
+    if (bodyType) {
+      filter.bodyType = { $regex: `^${bodyType}$`, $options: 'i' }
+    }
     if (fuelType) filter.fuelType = safeRegex(fuelType)
-    if (transmission) filter.transmission = new RegExp(`^${transmission}$`, 'i')
+    if (transmission) {
+      filter.transmission = new RegExp(`^${transmission}$`, 'i')
+    }
 
+    // ── Range filters ──────────────────────────────────────
     if (minPrice || maxPrice) {
       filter.price = {}
       if (minPrice) filter.price.$gte = Number(minPrice)
@@ -60,6 +72,8 @@ async function getVehicles(req, res, next) {
       if (minYear) filter.year.$gte = Number(minYear)
       if (maxYear) filter.year.$lte = Number(maxYear)
     }
+
+    // ── Full‑text search across multiple fields ────────────
     if (search) {
       const regex = safeRegex(search)
       filter.$or = [
@@ -70,6 +84,7 @@ async function getVehicles(req, res, next) {
       ]
     }
 
+    // ── Sorting ────────────────────────────────────────────
     const sortMap = {
       'price-asc': { price: 1 },
       'price-desc': { price: -1 },
@@ -79,6 +94,7 @@ async function getVehicles(req, res, next) {
     }
     const sortOption = sortMap[sort] || sortMap.newest
 
+    // ── Execute queries ────────────────────────────────────
     const [vehicles, total] = await Promise.all([
       Vehicle.find(filter).sort(sortOption).skip(skip).limit(limitNum).lean(),
       Vehicle.countDocuments(filter)
@@ -97,6 +113,9 @@ async function getVehicles(req, res, next) {
       )
     )
   } catch (err) {
+    console.error('========== VEHICLE ERROR ==========')
+    console.error(err)
+    console.error(err.stack)
     return next(err)
   }
 }
@@ -107,7 +126,6 @@ async function getVehicles(req, res, next) {
 async function getFeaturedVehicles(req, res, next) {
   try {
     const limit = Math.min(Number(req.query.limit) || 4, 12)
-
     const vehicles = await Vehicle.find({
       status: 'available',
       isFeatured: true
@@ -124,16 +142,53 @@ async function getFeaturedVehicles(req, res, next) {
       )
     )
   } catch (err) {
+    console.error('========== FEATURED ERROR ==========')
+    console.error(err)
+    console.error(err.stack)
     return next(err)
   }
 }
 
-function safeRegex(value) {
-  return new RegExp(escapeStringRegexp(value), 'i')
+/**
+ * GET /api/vehicles/slideshow
+ * ⬅️ NEW: Slideshow ke liye images fetch karta hai
+ * Ye sirf 'available' vehicles ki images return karega
+ */
+async function getSlideshowImages(req, res, next) {
+  try {
+    const limit = Math.min(Number(req.query.limit) || 20, 50)
+
+    const vehicles = await Vehicle.find({
+      status: 'available',
+      'images.0': { $exists: true } // Sirf woh vehicles jinke paas kam se kam ek image ho
+    })
+      .select('images make model')
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean()
+
+    // Har vehicle ki pehli image collect karo
+    const images = vehicles
+      .filter((v) => v.images && v.images.length > 0)
+      .map((v) => ({
+        url: v.images[0],
+        make: v.make,
+        model: v.model
+      }))
+
+    return res.json(
+      new ApiResponse(200, { images }, 'Slideshow images fetched successfully')
+    )
+  } catch (err) {
+    console.error('========== SLIDESHOW ERROR ==========')
+    console.error(err)
+    console.error(err.stack)
+    return next(err)
+  }
 }
+
 /**
  * GET /api/vehicles/:id
- * Supports both MongoDB ObjectId and legacy string id
  */
 function validateObjectId(id) {
   return mongoose.Types.ObjectId.isValid(id)
@@ -160,8 +215,16 @@ async function getVehicleById(req, res, next) {
       new ApiResponse(200, vehicle, 'Vehicle fetched successfully')
     )
   } catch (err) {
+    console.error('========== VEHICLE ERROR ==========')
+    console.error(err)
+    console.error(err.stack)
     return next(err)
   }
 }
 
-module.exports = { getVehicles, getFeaturedVehicles, getVehicleById }
+module.exports = {
+  getVehicles,
+  getFeaturedVehicles,
+  getSlideshowImages, // ⬅️ NEW: Export karo
+  getVehicleById
+}

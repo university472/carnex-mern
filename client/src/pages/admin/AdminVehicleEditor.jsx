@@ -260,8 +260,7 @@ export function AdminVehicleEditor() {
         year: v.year || prev.year,
 
         bodyType: v.bodyType || prev.bodyType,
-
-        fuelType: v.fuelType || prev.fuelType,
+        fuelType: v.fuelType || v.specs?.fuelType || prev.fuelType,
 
         specs: {
           ...prev.specs,
@@ -320,7 +319,7 @@ export function AdminVehicleEditor() {
   const handleFiles = (accepted) => {
     setFiles((prev) => {
       const all = [...prev, ...accepted]
-      return all.slice(0, 10)
+      return all.slice(0, 20)
     })
   }
 
@@ -605,6 +604,12 @@ export function AdminVehicleEditor() {
               options={bodyTypeOptions}
               onChange={(e) => updateField('bodyType', e.target.value)}
             />
+            <Select
+              label="Fuel Type"
+              value={form.fuelType}
+              options={fuelOptions}
+              onChange={(e) => updateField('fuelType', e.target.value)}
+            />
             <Input
               label="Drive Type"
               value={form.driveType}
@@ -757,9 +762,10 @@ export function AdminVehicleEditor() {
         {/* Transmission */}
         <CollapsibleSection title="Transmission">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Input
+            <Select
               label="Transmission Type"
               value={form.specs.transmission.type}
+              options={transmissionOptions}
               onChange={(e) =>
                 updateField('specs.transmission.type', e.target.value)
               }
@@ -1018,7 +1024,7 @@ export function AdminVehicleEditor() {
           <FileUpload
             label="Upload vehicle images"
             onFiles={handleFiles}
-            maxFiles={10}
+            maxFiles={20}
           />
 
           {/* Preview of newly selected images */}
