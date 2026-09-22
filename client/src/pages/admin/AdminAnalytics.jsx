@@ -135,7 +135,7 @@ export function AdminAnalytics() {
   const deviceColors = {
     desktop: 'bg-blue-500',
     mobile: 'bg-red-500',
-    tablet: 'bg-amber-500',
+    tablet: 'bg-neutral-800',
     unknown: 'bg-gray-400'
   }
 

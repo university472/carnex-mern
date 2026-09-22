@@ -37,7 +37,7 @@ export default {
           primary: '#DC2626',
           primaryHover: '#B91C1C',
           secondary: '#111827',
-          accent: '#F59E0B',
+          accent: '#EF4444',
           success: '#10B981',
           bg: '#F9FAFB',
           surface: '#FFFFFF',

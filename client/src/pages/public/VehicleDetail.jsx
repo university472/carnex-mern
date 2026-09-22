@@ -1219,8 +1219,8 @@ export function VehicleDetail() {
           <div className="rounded-2xl bg-slate-900 px-5 py-4 flex items-center gap-3">
             <Icon.shield className="h-6 w-6 text-red-500 flex-shrink-0" />
             <p className="text-xs text-slate-300 leading-snug">
-              Every Carnex vehicle is inspected and backed by our dealership
-              guarantee.
+              Every Carnex vehicle is carefully inspected by our dealership
+              team, so you can shop with confidence.
             </p>
           </div>
         </div>

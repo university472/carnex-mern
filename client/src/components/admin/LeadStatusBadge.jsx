@@ -4,7 +4,7 @@ import { capitalize } from '../../utils/formatters'
 
 const STATUS_STYLES = {
   new: 'bg-blue-50 text-blue-700 border-blue-200',
-  'in-review': 'bg-amber-50 text-amber-700 border-amber-200',
+  'in-review': 'bg-neutral-200 text-neutral-800 border-neutral-300',
   approved: 'bg-green-50 text-green-700 border-green-200',
   rejected: 'bg-red-50 text-red-700 border-red-200',
   responded: 'bg-green-50 text-green-700 border-green-200',
@@ -13,7 +13,7 @@ const STATUS_STYLES = {
   confirmed: 'bg-green-50 text-green-700 border-green-200',
   completed: 'bg-purple-50 text-purple-700 border-purple-200',
   cancelled: 'bg-red-50 text-red-700 border-red-200',
-  searching: 'bg-amber-50 text-amber-700 border-amber-200',
+  searching: 'bg-neutral-200 text-neutral-800 border-neutral-300',
   matched: 'bg-green-50 text-green-700 border-green-200',
   contacted: 'bg-blue-50 text-blue-700 border-blue-200',
   appraised: 'bg-purple-50 text-purple-700 border-purple-200'

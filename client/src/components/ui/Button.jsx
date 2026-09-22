@@ -10,7 +10,7 @@ const variantClasses = {
   secondary: 'bg-brand-secondary text-gray-100 hover:bg-black/80 shadow-card',
   ghost:
     'bg-transparent text-brand-secondary hover:bg-brand-border/30 border border-brand-border',
-  accent: 'bg-brand-accent text-brand-secondary hover:bg-[#d97706] shadow-card'
+  accent: 'bg-brand-accent text-white hover:bg-brand-primaryHover shadow-card'
 }
 
 const sizeClasses = {
