@@ -20,6 +20,7 @@ const adminSettingsRoutes = require('./src/routes/admin/settings')
 const adminAnalyticsRoutes = require('./src/routes/admin/analytics')
 const adminReviewRoutes = require('./src/routes/admin/reviews')
 const adminNotificationRoutes = require('./src/routes/admin/notifications')
+const adminFinanceRoutes = require('./src/routes/admin/finance')
 
 // ── Public routes ─────────────────────────────────────────────
 const publicVehicleRoutes = require('./src/routes/public/vehicles')
@@ -31,6 +32,7 @@ const publicContactRoutes = require('./src/routes/public/contact')
 const publicSettingsRoutes = require('./src/routes/public/settings')
 const publicAnalyticsRoutes = require('./src/routes/public/analytics')
 const publicReviewRoutes = require('./src/routes/public/reviews')
+const publicGoogleReviewRoutes = require('./src/routes/public/googleReviews')
 
 // ── Middleware ────────────────────────────────────────────────
 const {
@@ -111,6 +113,7 @@ app.use(`${API_PREFIX}/admin/settings`, adminSettingsRoutes)
 app.use(`${API_PREFIX}/admin/analytics`, adminAnalyticsRoutes)
 app.use(`${API_PREFIX}/admin/reviews`, adminReviewRoutes)
 app.use(`${API_PREFIX}/admin/notifications`, adminNotificationRoutes)
+app.use(`${API_PREFIX}/admin/finance`, adminFinanceRoutes)
 
 // ── 10) Public routes ─────────────────────────────────────────
 app.use(`${API_PREFIX}/vehicles`, publicVehicleRoutes)
@@ -122,6 +125,7 @@ app.use(`${API_PREFIX}/contact`, formLimiter, publicContactRoutes)
 app.use(`${API_PREFIX}/settings`, publicSettingsRoutes)
 app.use(`${API_PREFIX}/analytics`, publicAnalyticsRoutes)
 app.use(`${API_PREFIX}/reviews`, publicReviewRoutes)
+app.use(`${API_PREFIX}/google-reviews`, publicGoogleReviewRoutes)
 
 // ── 11) 404 + error handler ───────────────────────────────────
 app.use(notFoundHandler)

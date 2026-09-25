@@ -623,9 +623,11 @@ import { Badge } from '../../components/ui/Badge'
 import { VehicleCard } from '../../components/vehicles/VehicleCard'
 import { SkeletonCard } from '../../components/ui/Skeleton'
 import { useVehicles } from '../../hooks/useVehicles'
-import { getApprovedReviews } from '../../services/reviewService'
-import { ReviewCard } from '../../components/reviews/ReviewCard'
-import { ReviewForm } from '../../components/reviews/ReviewForm'
+// Google Reviews section is temporarily disabled (no Places API billing yet).
+// Re-enable by uncommenting these two imports plus the block below marked
+// "GOOGLE REVIEWS — DISABLED".
+// import { getGoogleReviews } from '../../services/reviewService'
+// import { GoogleReviewCard } from '../../components/reviews/GoogleReviewCard'
 
 // ---------------------------------------------------------------------------
 // Social Media URLs (replace with your actual links)
@@ -633,6 +635,7 @@ import { ReviewForm } from '../../components/reviews/ReviewForm'
 const INSTAGRAM_URL = 'https://www.instagram.com/yourhandle'
 const FACEBOOK_URL = 'https://www.facebook.com/yourpage'
 const TIKTOK_URL = 'https://www.tiktok.com/@yourhandle'
+const GOOGLE_MAPS_URL = 'https://maps.app.goo.gl/oKgPzwuNp92o5LXv9?g_st=aw'
 
 // ---------------------------------------------------------------------------
 // Static data (some arrays will be replaced with dynamic data from API)
@@ -777,23 +780,20 @@ export function Home() {
     setIsPaused(false)
   }
 
-  // ── Dynamic reviews ──────────────────────────────────────────────────
-  const [reviews, setReviews] = useState([])
-  const [reviewModalOpen, setReviewModalOpen] = useState(false)
-
-  const fetchReviews = () => {
-    getApprovedReviews()
-      .then((res) => {
-        setReviews(res.data?.data || [])
-      })
-      .catch(() => {
-        setReviews([])
-      })
-  }
-
-  useEffect(() => {
-    fetchReviews()
-  }, [])
+  // ── GOOGLE REVIEWS — DISABLED (no Places API billing yet) ──────────────
+  // const [googleReviews, setGoogleReviews] = useState(null)
+  // const [googleReviewsLoading, setGoogleReviewsLoading] = useState(true)
+  //
+  // useEffect(() => {
+  //   getGoogleReviews()
+  //     .then((res) => {
+  //       setGoogleReviews(res.data?.data || null)
+  //     })
+  //     .catch(() => {
+  //       setGoogleReviews(null)
+  //     })
+  //     .finally(() => setGoogleReviewsLoading(false))
+  // }, [])
 
   // ── Quick Search handler ─────────────────────────────────────────────
   const handleFilterChange = (field, value) => {
@@ -1257,60 +1257,59 @@ export function Home() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          REVIEWS
+          REVIEWS — GOOGLE REVIEWS DISABLED (no Places API billing yet).
+          Re-enable by restoring this block plus the imports/state marked
+          "GOOGLE REVIEWS — DISABLED" above.
          ═══════════════════════════════════════════════════════════════════ */}
+      {/*
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-accent">
               What Customers Say
             </p>
-            <h2 className="text-section-title">
-              Real reviews from real buyers
-            </h2>
+            <h2 className="text-section-title">Real reviews from Google</h2>
+            {googleReviews?.rating != null && (
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-brand-muted">
+                <span className="font-semibold text-brand-secondary">
+                  {googleReviews.rating.toFixed(1)}
+                </span>
+                <span className="text-yellow-400" aria-hidden="true">
+                  {'★'.repeat(Math.round(googleReviews.rating))}
+                </span>
+                <span>
+                  {googleReviews.totalRatings} Google review
+                  {googleReviews.totalRatings !== 1 ? 's' : ''}
+                </span>
+              </p>
+            )}
           </div>
-          <Button onClick={() => setReviewModalOpen(true)}>
-            Write a Review
-          </Button>
+          <a href={GOOGLE_MAPS_URL} target="_blank" rel="noopener noreferrer">
+            <Button>Write a Review</Button>
+          </a>
         </div>
 
-        {reviews?.length > 0 && (
-          <div className="mt-6 space-y-4">
-            <h3 className="text-lg font-semibold text-brand-secondary">
-              More customer reviews
-            </h3>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {reviews.map((review) => (
-                <ReviewCard key={review._id} review={review} />
-              ))}
-            </div>
+        {googleReviewsLoading ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
           </div>
-        )}
-
-        {reviewModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-white rounded-card p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-xl">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-brand-secondary">
-                  Submit Your Review
-                </h3>
-                <button
-                  onClick={() => setReviewModalOpen(false)}
-                  className="text-brand-muted hover:text-brand-secondary text-xl leading-none"
-                >
-                  ✕
-                </button>
-              </div>
-              <ReviewForm
-                onSuccess={() => {
-                  setReviewModalOpen(false)
-                  fetchReviews()
-                }}
-              />
-            </div>
+        ) : googleReviews?.reviews?.length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {googleReviews.reviews.map((review) => (
+              <GoogleReviewCard key={review.time} review={review} />
+            ))}
+          </div>
+        ) : (
+          <div className="card-surface p-6 text-center">
+            <p className="text-body-muted">
+              Google reviews will appear here once connected.
+            </p>
           </div>
         )}
       </section>
+      */}
 
       {/* ═══════════════════════════════════════════════════════════════════
           LOCATION (Google Map + Address)

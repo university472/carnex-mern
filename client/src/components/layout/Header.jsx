@@ -629,7 +629,8 @@ const MAIN_NAV = [
       { label: 'Sedans', path: '/inventory?bodyType=Sedan' },
       { label: 'SUVs', path: '/inventory?bodyType=SUV' },
       { label: 'Pickup Trucks', path: '/inventory?bodyType=Truck' },
-      { label: 'Hatchbacks', path: '/inventory?bodyType=Hatchback' }
+      { label: 'Hatchbacks', path: '/inventory?bodyType=Hatchback' },
+      { label: 'Sold Vehicles', path: '/sold-vehicles' }
     ]
   },
   { label: 'Financing', path: '/financing' },

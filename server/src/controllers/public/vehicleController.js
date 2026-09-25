@@ -30,6 +30,7 @@ async function getVehicles(req, res, next) {
       minYear,
       maxYear,
       search,
+      status,
       sort = 'newest',
       page = 1,
       limit = 12
@@ -39,8 +40,10 @@ async function getVehicles(req, res, next) {
     const limitNum = Math.min(Number(limit) || 12, 60)
     const skip = (pageNum - 1) * limitNum
 
+    // Default inventory shows only available cars; pass status=sold
+    // to fetch the sold-vehicles archive instead.
     const filter = {
-      status: { $in: ['available', 'sold'] }
+      status: status === 'sold' ? 'sold' : 'available'
     }
 
     // ── Exact‑match filters ────────────────────────────────

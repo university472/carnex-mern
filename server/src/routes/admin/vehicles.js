@@ -9,6 +9,7 @@ const {
   adminCreateVehicle,
   adminUpdateVehicle,
   adminUpdateVehicleStatus,
+  adminUpdateVehicleFinance,
   adminSoftDeleteVehicle,
   adminDecodeVin,
   adminSoldVehicles
@@ -17,6 +18,9 @@ const {
   createVehicleValidator,
   updateVehicleValidator
 } = require('../../validators/vehicleValidators')
+const {
+  updateVehicleFinanceValidator
+} = require('../../validators/financeValidators')
 
 // Upload middleware (optional — gracefully skipped if multer not configured)
 let uploadMiddleware
@@ -90,6 +94,12 @@ router.patch(
   '/:id/status',
   authorize('super-admin', 'admin'),
   adminUpdateVehicleStatus
+)
+router.patch(
+  '/:id/finance',
+  authorize('super-admin', 'admin'),
+  updateVehicleFinanceValidator,
+  adminUpdateVehicleFinance
 )
 
 router.delete('/:id', authorize('super-admin', 'admin'), adminSoftDeleteVehicle)

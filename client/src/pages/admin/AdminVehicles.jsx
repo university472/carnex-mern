@@ -1,8 +1,9 @@
 // client/src/pages/admin/AdminVehicles.jsx
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../../services/api'
-import { useVehicles } from '../../hooks/useVehicles'
+import { useAuth } from '../../hooks/useAuth'
+import { canViewFinance } from '../../utils/FinanceRoute'
 import { Button } from '../../components/ui/Button'
 // import { Badge } from '../../components/ui/Badge'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
@@ -19,6 +20,8 @@ import { formatPrice, formatMileage, formatDate } from '../../utils/formatters'
 // }
 
 export function AdminVehicles() {
+  const { user } = useAuth()
+  const showFinance = canViewFinance(user)
   const toast = useToast()
   const [page, setPage] = useState(1)
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -34,10 +37,30 @@ export function AdminVehicles() {
 
   const [savingSale, setSavingSale] = useState(false)
 
-  const { vehicles, pagination, loading, reload } = useVehicles({
-    page,
-    limit: 20
-  })
+  const [vehicles, setVehicles] = useState([])
+  const [pagination, setPagination] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  const reload = useCallback(async () => {
+    setLoading(true)
+    try {
+      // Admin's active-inventory list excludes sold vehicles by default —
+      // those live on the dedicated Sold Vehicle History page.
+      const res = await api.get('/admin/vehicles', { params: { page, limit: 20 } })
+      const { items, pagination: pg } = res.data?.data || {}
+      setVehicles(items || [])
+      setPagination(pg || null)
+    } catch {
+      setVehicles([])
+      setPagination(null)
+    } finally {
+      setLoading(false)
+    }
+  }, [page])
+
+  useEffect(() => {
+    reload()
+  }, [reload])
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -259,6 +282,13 @@ focus:ring-brand-primary
                             Edit
                           </Button>
                         </Link>
+                        {showFinance && (
+                          <Link to={`/dealer-panel/vehicles/${v._id}/finance`}>
+                            <Button size="sm" variant="ghost">
+                              Finance
+                            </Button>
+                          </Link>
+                        )}
                         <Button
                           size="sm"
                           variant="ghost"

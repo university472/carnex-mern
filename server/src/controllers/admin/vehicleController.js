@@ -6,6 +6,13 @@ const ApiError = require('../../utils/ApiError')
 const ApiResponse = require('../../utils/ApiResponse')
 const { decodeVin } = require('../../services/vinService')
 const { getPaginationParams } = require('../../utils/pagination')
+const { computeFinanceTotals } = require('../../utils/vehicleFinance')
+
+// Vehicle.finance is select:false — only these roles may ever receive it.
+const FINANCE_ROLES = ['super-admin', 'admin']
+function canViewFinance(req) {
+  return FINANCE_ROLES.includes(req.admin?.role)
+}
 
 let uploadToCloudinary, deleteFromCloudinary
 try {
@@ -61,8 +68,15 @@ async function adminGetVehicles(req, res, next) {
       sort = 'newest'
     } = req.query
 
+    // Active inventory list excludes sold vehicles by default — they live
+    // in the dedicated Sold Vehicle History view. Pass status=sold explicitly
+    // to include them.
     const query = {}
-    if (status) query.status = status
+    if (status) {
+      query.status = status
+    } else {
+      query.status = { $ne: 'sold' }
+    }
     if (make) query.make = safeRegex(make)
     if (model) query.model = safeRegex(model)
     if (bodyType) query.bodyType = safeRegex(bodyType)
@@ -134,7 +148,9 @@ async function adminGetVehicleById(req, res, next) {
       return next(ApiError.badRequest('Invalid vehicle id'))
     }
 
-    const vehicle = await Vehicle.findById(req.params.id).lean()
+    const vehicle = await Vehicle.findById(req.params.id)
+      .select(canViewFinance(req) ? '+finance' : '')
+      .lean()
 
     if (!vehicle) {
       return next(ApiError.notFound('Vehicle not found'))
@@ -204,6 +220,8 @@ async function adminCreateVehicle(req, res, next) {
     payload.images = [...existingImages, ...uploadedImages]
 
     delete payload.data
+    // Finance is only writable through PATCH /:id/finance
+    delete payload.finance
 
     const vehicle = await Vehicle.create(payload)
     return res
@@ -282,6 +300,8 @@ async function adminUpdateVehicle(req, res, next) {
     )
 
     delete payload.data
+    // Finance is only writable through PATCH /:id/finance
+    delete payload.finance
 
     const updated = await Vehicle.findByIdAndUpdate(req.params.id, payload, {
       new: true,
@@ -323,9 +343,18 @@ async function adminUpdateVehicleStatus(req, res, next) {
       return next(ApiError.badRequest('Invalid status value'))
     }
 
+    const existingVehicle = await Vehicle.findById(req.params.id)
+      .select('+finance')
+      .lean()
+    if (!existingVehicle) {
+      return next(ApiError.notFound('Vehicle not found'))
+    }
+
     const updateData = {
       status
     }
+
+    let resolvedSoldPrice = 0
 
     // when vehicle sold
     if (status === 'sold') {
@@ -335,6 +364,9 @@ async function adminUpdateVehicleStatus(req, res, next) {
 
       if (soldPrice) {
         updateData.soldPrice = Number(soldPrice)
+        resolvedSoldPrice = Number(soldPrice)
+      } else {
+        resolvedSoldPrice = existingVehicle.soldPrice || 0
       }
 
       if (buyer) {
@@ -356,6 +388,13 @@ async function adminUpdateVehicleStatus(req, res, next) {
 
       updateData.buyer = null
     }
+
+    // Keep finance.totals in sync with the sale price whenever it changes,
+    // so profit figures never require a separate finance-page visit.
+    updateData['finance.totals'] = computeFinanceTotals(
+      existingVehicle.finance,
+      resolvedSoldPrice
+    )
 
     const updated = await Vehicle.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
@@ -394,11 +433,88 @@ async function adminSoftDeleteVehicle(req, res, next) {
   }
 }
 
+// PATCH /api/admin/vehicles/:id/finance
+async function adminUpdateVehicleFinance(req, res, next) {
+  try {
+    if (!validateObjectId(req.params.id)) {
+      return next(ApiError.badRequest('Invalid vehicle id'))
+    }
+
+    const errors = validationResult(req)
+    if (!errors.isEmpty())
+      return next(ApiError.badRequest('Validation failed', errors.array()))
+
+    const existingVehicle = await Vehicle.findById(req.params.id)
+      .select('+finance')
+      .lean()
+    if (!existingVehicle) {
+      return next(ApiError.notFound('Vehicle not found'))
+    }
+
+    const financeFields = [
+      'purchasePrice',
+      'purchaseDate',
+      'acquisitionSource',
+      'acquisitionTax',
+      'acquisitionFees',
+      'transportationCost',
+      'auctionFees',
+      'otherAcquisitionCost',
+      'reconditioningCost',
+      'otherPrepCost',
+      'customerSalesTax',
+      'registrationFee',
+      'titleFee',
+      'discountGiven',
+      'otherSaleCost',
+      'taxRemittedByCompany',
+      'otherTaxesFees',
+      'notes'
+    ]
+
+    // A field sent as '' means the admin cleared it — reset it rather than
+    // silently keeping the old value.
+    const clearableFields = ['purchaseDate', 'acquisitionSource', 'notes']
+    const mergedFinance = { ...(existingVehicle.finance || {}) }
+    for (const field of financeFields) {
+      const value = req.body[field]
+      if (value === undefined) continue
+      if (value === '' || value === null) {
+        if (clearableFields.includes(field)) {
+          delete mergedFinance[field]
+        } else {
+          mergedFinance[field] = 0
+        }
+      } else {
+        mergedFinance[field] = value
+      }
+    }
+
+    mergedFinance.totals = computeFinanceTotals(
+      mergedFinance,
+      existingVehicle.soldPrice
+    )
+
+    const updated = await Vehicle.findByIdAndUpdate(
+      req.params.id,
+      { finance: mergedFinance },
+      { new: true, runValidators: true }
+    ).select('+finance')
+
+    return res.json(
+      new ApiResponse(200, updated, 'Vehicle finance record updated successfully')
+    )
+  } catch (err) {
+    return next(ApiError.internal(err.message))
+  }
+}
+
 async function adminSoldVehicles(req, res, next) {
   try {
     const vehicles = await Vehicle.find({
       status: 'sold'
     })
+      .select(canViewFinance(req) ? '+finance' : '')
       .populate('soldBy', 'name email')
       .sort({
         soldAt: -1
@@ -452,6 +568,7 @@ module.exports = {
   adminCreateVehicle,
   adminUpdateVehicle,
   adminUpdateVehicleStatus,
+  adminUpdateVehicleFinance,
   adminSoftDeleteVehicle,
   adminSoldVehicles,
   adminDecodeVin

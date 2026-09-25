@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import api from '../../services/api'
+import { useAuth } from '../../hooks/useAuth'
+import { canViewFinance } from '../../utils/FinanceRoute'
 import { formatPrice, formatDate } from '../../utils/formatters'
 
 export function AdminSoldVehicles() {
+  const { user } = useAuth()
+  const showFinance = canViewFinance(user)
   const [vehicles, setVehicles] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -48,6 +53,14 @@ export function AdminSoldVehicles() {
                 <th>Sold Date</th>
 
                 <th>Sold By</th>
+
+                {showFinance && (
+                  <>
+                    <th>Net Profit</th>
+
+                    <th>Finance</th>
+                  </>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -76,6 +89,29 @@ export function AdminSoldVehicles() {
                   <td className="text-gray-700 font-medium">
                     {v.soldBy?.name || 'Admin'}
                   </td>
+
+                  {showFinance && (
+                    <>
+                      <td
+                        className={`font-semibold ${
+                          (v.finance?.totals?.netProfit ?? 0) >= 0
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }`}
+                      >
+                        {formatPrice(v.finance?.totals?.netProfit)}
+                      </td>
+
+                      <td>
+                        <Link
+                          to={`/dealer-panel/vehicles/${v._id}/finance`}
+                          className="text-brand-primary hover:underline"
+                        >
+                          View
+                        </Link>
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))}
             </tbody>{' '}

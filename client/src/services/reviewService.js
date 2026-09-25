@@ -7,6 +7,9 @@ export const submitReview = (formData) =>
 
 export const getApprovedReviews = () => api.get('/reviews')
 
+// Real reviews pulled live from the business's Google Business Profile
+export const getGoogleReviews = () => api.get('/google-reviews')
+
 // Admin
 export const getReviews = (params) => api.get('/admin/reviews', { params })
 export const approveReview = (id) => api.patch(`/admin/reviews/${id}/approve`)

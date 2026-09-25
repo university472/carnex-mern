@@ -1,6 +1,63 @@
 // server/src/models/Vehicle.js
 const mongoose = require('mongoose')
 
+// Financial / profit tracking. select:false keeps this out of every query
+// (public site, sales/viewer roles) unless a controller explicitly asks for
+// it with .select('+finance') — only admin-only endpoints do that.
+const financeSchema = new mongoose.Schema(
+  {
+    // Acquisition
+    purchasePrice: { type: Number, min: 0, default: 0 },
+    purchaseDate: { type: Date },
+    acquisitionSource: {
+      type: String,
+      enum: [
+        'auction',
+        'trade-in',
+        'wholesale',
+        'private-party',
+        'other'
+      ]
+    },
+    acquisitionTax: { type: Number, min: 0, default: 0 },
+    acquisitionFees: { type: Number, min: 0, default: 0 },
+    transportationCost: { type: Number, min: 0, default: 0 },
+    auctionFees: { type: Number, min: 0, default: 0 },
+    otherAcquisitionCost: { type: Number, min: 0, default: 0 },
+
+    // Reconditioning / prep
+    reconditioningCost: { type: Number, min: 0, default: 0 },
+    otherPrepCost: { type: Number, min: 0, default: 0 },
+
+    // Sale-side transaction costs (sale price/date live on soldPrice/soldAt above)
+    customerSalesTax: { type: Number, min: 0, default: 0 },
+    registrationFee: { type: Number, min: 0, default: 0 },
+    titleFee: { type: Number, min: 0, default: 0 },
+    discountGiven: { type: Number, min: 0, default: 0 },
+    otherSaleCost: { type: Number, min: 0, default: 0 },
+
+    // Tax / fees remitted or borne by the company (not passed to the customer)
+    taxRemittedByCompany: { type: Number, min: 0, default: 0 },
+    otherTaxesFees: { type: Number, min: 0, default: 0 },
+
+    notes: { type: String, trim: true, maxlength: 3000 },
+
+    // Server-computed — see server/src/utils/vehicleFinance.js
+    totals: {
+      totalAcquisitionCost: { type: Number, default: 0 },
+      totalReconCost: { type: Number, default: 0 },
+      totalInvestment: { type: Number, default: 0 },
+      grossSaleAmount: { type: Number, default: 0 },
+      totalExpenses: { type: Number, default: 0 },
+      totalTaxes: { type: Number, default: 0 },
+      netCost: { type: Number, default: 0 },
+      grossProfit: { type: Number, default: 0 },
+      netProfit: { type: Number, default: 0 }
+    }
+  },
+  { _id: false }
+)
+
 const vehicleSchema = new mongoose.Schema(
   {
     // ---------- Basic Information ----------
@@ -233,6 +290,13 @@ const vehicleSchema = new mongoose.Schema(
         lowercase: true,
         trim: true
       }
+    },
+
+    // ---------- Financial / Profit Tracking (admin only) ----------
+    finance: {
+      type: financeSchema,
+      select: false,
+      default: () => ({})
     }
   },
   {
@@ -244,6 +308,8 @@ vehicleSchema.index(
   { status: 1, make: 1, model: 1, year: -1, price: 1 },
   { name: 'vehicle_inventory_index' }
 )
+
+vehicleSchema.index({ status: 1, soldAt: -1 }, { name: 'vehicle_sold_date_index' })
 
 const Vehicle = mongoose.model('Vehicle', vehicleSchema)
 

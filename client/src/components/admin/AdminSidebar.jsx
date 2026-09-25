@@ -1,6 +1,7 @@
 // client/src/components/admin/AdminSidebar.jsx
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { canViewFinance } from '../../utils/FinanceRoute'
 
 const baseLink =
   'flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium transition-colors'
@@ -9,7 +10,7 @@ const inactiveLink =
   'text-brand-muted hover:bg-brand-surface hover:text-brand-secondary'
 
 export function AdminSidebar() {
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
 
   return (
     <aside className="flex h-full w-64 flex-col border-r border-brand-border bg-brand-secondary text-gray-100">
@@ -38,6 +39,16 @@ export function AdminSidebar() {
         >
           Vehicles
         </NavLink>
+        {canViewFinance(user) && (
+          <NavLink
+            to="/dealer-panel/finance"
+            className={({ isActive }) =>
+              `${baseLink} ${isActive ? activeLink : inactiveLink}`
+            }
+          >
+            Finance Dashboard
+          </NavLink>
+        )}
         <NavLink
           to="/dealer-panel/finance-leads"
           className={({ isActive }) =>

@@ -5,9 +5,11 @@ import { AdminLayout } from './components/layout/AdminLayout'
 import { AdminSessionWatcher } from './components/auth/AdminSessionWatcher'
 import { AdminReviews } from './pages/admin/AdminReviews'
 import { ProtectedRoute } from './utils/ProtectedRoute'
+import { FinanceRoute } from './utils/FinanceRoute'
 
 import { Home } from './pages/public/Home'
 import { Inventory } from './pages/public/Inventory'
+import { SoldVehicles } from './pages/public/SoldVehicles'
 import { VehicleDetail } from './pages/public/VehicleDetail'
 import { Financing } from './pages/public/Financing'
 import { TradeIn } from './pages/public/TradeIn'
@@ -24,6 +26,8 @@ import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { AdminVehicles } from './pages/admin/AdminVehicles'
 import { AdminSoldVehicles } from './pages/admin/AdminSoldVehicles'
 import { AdminVehicleEditor } from './pages/admin/AdminVehicleEditor'
+import { AdminVehicleFinance } from './pages/admin/AdminVehicleFinance'
+import { AdminFinanceDashboard } from './pages/admin/AdminFinanceDashboard'
 import { AdminFinanceLeads } from './pages/admin/AdminFinanceLeads'
 import { AdminTradeInLeads } from './pages/admin/AdminTradeInLeads'
 import { AdminTestDriveLeads } from './pages/admin/AdminTestDriveLeads'
@@ -47,6 +51,7 @@ export function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/inventory" element={<Inventory />} />
+          <Route path="/sold-vehicles" element={<SoldVehicles />} />
           <Route path="/vehicles/:id" element={<VehicleDetail />} />
           <Route path="/financing" element={<Financing />} />
           <Route path="/trade-in" element={<TradeIn />} />
@@ -86,6 +91,17 @@ export function App() {
               path="/dealer-panel/vehicles/:id/edit"
               element={<AdminVehicleEditor />}
             />
+            {/* Profit / financial pages — super-admin & admin only */}
+            <Route element={<FinanceRoute />}>
+              <Route
+                path="/dealer-panel/vehicles/:id/finance"
+                element={<AdminVehicleFinance />}
+              />
+              <Route
+                path="/dealer-panel/finance"
+                element={<AdminFinanceDashboard />}
+              />
+            </Route>
             <Route
               path="/dealer-panel/finance-leads"
               element={<AdminFinanceLeads />}
