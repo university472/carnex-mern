@@ -252,7 +252,7 @@ export function AdminFinanceDashboard() {
                   <tr className="border-b border-brand-border text-left text-brand-muted">
                     <th className="py-2 pr-3 font-medium">Vehicle</th>
                     <th className="py-2 pr-3 font-medium">Sold Date</th>
-                    <th className="py-2 pr-3 font-medium">Purchase Price</th>
+                    <th className="py-2 pr-3 font-medium">Cost Price</th>
                     <th className="py-2 pr-3 font-medium">Total Investment</th>
                     <th className="py-2 pr-3 font-medium">Sale Price</th>
                     <th className="py-2 pr-3 font-medium">Expenses</th>
@@ -286,7 +286,7 @@ export function AdminFinanceDashboard() {
                           {formatPrice(t.totalInvestment)}
                         </td>
                         <td className="py-2 pr-3 text-brand-muted">
-                          {formatPrice(v.soldPrice)}
+                          {formatPrice(t.grossSaleAmount || v.soldPrice)}
                         </td>
                         <td className="py-2 pr-3 text-brand-muted">
                           {formatPrice(t.totalExpenses)}

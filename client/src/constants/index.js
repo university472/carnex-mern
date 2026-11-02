@@ -18,6 +18,9 @@ export const DEALERSHIP = {
   addressLine2: 'Sacramento, CA 95824, USA'
 }
 
+// Shown under every public vehicle price
+export const DEALER_FEE_NOTE = 'The dealer fee is included in the price'
+
 export const BUSINESS_HOURS = [
   { day: 'Monday', hours: '9:00 AM – 5:00 PM' },
   { day: 'Tuesday', hours: '9:00 AM – 5:00 PM' },

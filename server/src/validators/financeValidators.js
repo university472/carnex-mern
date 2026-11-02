@@ -6,15 +6,12 @@ const optionalAmount = (field) =>
 
 exports.updateVehicleFinanceValidator = [
   optionalAmount('purchasePrice'),
-  body('purchaseDate').optional({ checkFalsy: true }).isISO8601(),
-  body('acquisitionSource')
-    .optional({ checkFalsy: true })
-    .isIn(['auction', 'trade-in', 'wholesale', 'private-party', 'other']),
-  optionalAmount('acquisitionTax'),
-  optionalAmount('acquisitionFees'),
-  optionalAmount('transportationCost'),
-  optionalAmount('auctionFees'),
-  optionalAmount('otherAcquisitionCost'),
+  optionalAmount('listedFor'),
+  optionalAmount('listedAmount'),
+  optionalAmount('minimumPrice'),
+  optionalAmount('soldFor'),
+  optionalAmount('collectedAmount'),
+  optionalAmount('dmvFeePaid'),
 
   optionalAmount('reconditioningCost'),
   optionalAmount('otherPrepCost'),

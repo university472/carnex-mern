@@ -7,23 +7,15 @@ const mongoose = require('mongoose')
 const financeSchema = new mongoose.Schema(
   {
     // Acquisition
+    // Cost Price — kept under the original `purchasePrice` key so existing
+    // records keep their data.
     purchasePrice: { type: Number, min: 0, default: 0 },
-    purchaseDate: { type: Date },
-    acquisitionSource: {
-      type: String,
-      enum: [
-        'auction',
-        'trade-in',
-        'wholesale',
-        'private-party',
-        'other'
-      ]
-    },
-    acquisitionTax: { type: Number, min: 0, default: 0 },
-    acquisitionFees: { type: Number, min: 0, default: 0 },
-    transportationCost: { type: Number, min: 0, default: 0 },
-    auctionFees: { type: Number, min: 0, default: 0 },
-    otherAcquisitionCost: { type: Number, min: 0, default: 0 },
+    listedFor: { type: Number, min: 0, default: 0 },
+    listedAmount: { type: Number, min: 0, default: 0 },
+    minimumPrice: { type: Number, min: 0, default: 0 },
+    soldFor: { type: Number, min: 0, default: 0 },
+    collectedAmount: { type: Number, min: 0, default: 0 },
+    dmvFeePaid: { type: Number, min: 0, default: 0 },
 
     // Reconditioning / prep
     reconditioningCost: { type: Number, min: 0, default: 0 },
@@ -48,6 +40,8 @@ const financeSchema = new mongoose.Schema(
       totalReconCost: { type: Number, default: 0 },
       totalInvestment: { type: Number, default: 0 },
       grossSaleAmount: { type: Number, default: 0 },
+      amountAfterFee: { type: Number, default: 0 },
+      profit: { type: Number, default: 0 },
       totalExpenses: { type: Number, default: 0 },
       totalTaxes: { type: Number, default: 0 },
       netCost: { type: Number, default: 0 },

@@ -615,7 +615,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { ContactForm } from '../../components/forms/ContactForm'
 import { Link, useNavigate } from 'react-router-dom'
-import { DEALERSHIP, BUSINESS_HOURS } from '../../constants'
+import { DEALERSHIP, BUSINESS_HOURS, DEALER_FEE_NOTE } from '../../constants'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
@@ -962,6 +962,9 @@ export function Home() {
                           currency: 'USD',
                           maximumFractionDigits: 0
                         }).format(currentHeroVehicle.price || 0)}
+                      </p>
+                      <p className="text-xs font-bold text-white/90">
+                        {DEALER_FEE_NOTE}
                       </p>
                     </div>
                   </Link>

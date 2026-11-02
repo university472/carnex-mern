@@ -8,6 +8,7 @@ import { VehicleGrid } from '../../components/vehicles/VehicleGrid'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { StoreStatusBadge } from '../../components/ui/StoreStatusBadge'
 import { QuoteForm } from '../../components/vehicles/QuoteForm'
+import { DEALER_FEE_NOTE } from '../../constants'
 
 // ── Formatting helpers ───────────────────────────────
 const fmtCur = (val) =>
@@ -1028,6 +1029,9 @@ export function VehicleDetail() {
               <span className="text-5xl font-black text-slate-900 tracking-tight">
                 {fmtCur(showSale ? salePrice : price)}
               </span>
+              <p className="mt-2 text-sm font-bold text-red-600">
+                {DEALER_FEE_NOTE}
+              </p>
             </div>
           </Card>
 

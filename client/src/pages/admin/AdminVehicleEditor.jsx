@@ -1031,7 +1031,7 @@ export function AdminVehicleEditor() {
           {files.length > 0 && (
             <div className="mt-4">
               <p className="text-sm text-brand-muted mb-2">
-                New images (first image will be cover):
+                New images (drag and drop to reorder — first image will be cover):
               </p>
 
               {/* <ImageReorder
@@ -1068,7 +1068,7 @@ export function AdminVehicleEditor() {
           {form.images.length > 0 && (
             <div className="mt-3">
               <p className="text-sm text-brand-muted mb-2">
-                Current images (drag or use arrows to reorder):
+                Current images (drag and drop to reorder — first image is the cover):
               </p>
               <ImageReorder
                 images={form.images}

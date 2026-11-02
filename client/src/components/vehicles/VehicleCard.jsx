@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom'
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
+import { DEALER_FEE_NOTE } from '../../constants'
 
 /**
  * Supports both MongoDB documents (_id) and legacy mock data (id).
@@ -133,6 +134,9 @@ export function VehicleCard({ vehicle }) {
             <p className="text-brand-muted">Price</p>
             <p className="text-brand-secondary text-2xl font-extrabold tracking-tight">
               {formattedPrice}
+            </p>
+            <p className="text-[11px] font-bold leading-snug text-brand-primary">
+              {DEALER_FEE_NOTE}
             </p>
           </div>
           <div className="space-y-0.5">

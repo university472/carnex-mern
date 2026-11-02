@@ -3,29 +3,20 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import api from '../../services/api'
 import { Input } from '../../components/ui/Input'
-import { Select } from '../../components/ui/Select'
 import { Button } from '../../components/ui/Button'
 import { CollapsibleSection } from '../../components/admin/CollapsibleSection'
 import { useToast } from '../../hooks/useToast'
 import { formatPrice, formatDate } from '../../utils/formatters'
 
-const acquisitionSourceOptions = [
-  { label: 'Auction', value: 'auction' },
-  { label: 'Trade-In', value: 'trade-in' },
-  { label: 'Wholesale', value: 'wholesale' },
-  { label: 'Private Party', value: 'private-party' },
-  { label: 'Other', value: 'other' }
-]
-
 const initialForm = {
+  // Cost Price — stored under the original `purchasePrice` key
   purchasePrice: '',
-  purchaseDate: '',
-  acquisitionSource: '',
-  acquisitionTax: '',
-  acquisitionFees: '',
-  transportationCost: '',
-  auctionFees: '',
-  otherAcquisitionCost: '',
+  listedFor: '',
+  listedAmount: '',
+  minimumPrice: '',
+  soldFor: '',
+  collectedAmount: '',
+  dmvFeePaid: '',
   reconditioningCost: '',
   otherPrepCost: '',
   customerSalesTax: '',
@@ -43,20 +34,21 @@ function n(value) {
   return Number.isFinite(num) ? num : 0
 }
 
+// Mirrors server/src/utils/vehicleFinance.js — keep the two in sync.
 function computeTotals(form, soldPrice) {
-  const totalAcquisitionCost =
-    n(form.purchasePrice) +
-    n(form.acquisitionTax) +
-    n(form.acquisitionFees) +
-    n(form.transportationCost) +
-    n(form.auctionFees) +
-    n(form.otherAcquisitionCost)
-
+  const costPrice = n(form.purchasePrice)
+  const totalAcquisitionCost = costPrice
   const totalReconCost = n(form.reconditioningCost) + n(form.otherPrepCost)
   const totalInvestment = totalAcquisitionCost + totalReconCost
-  const grossSaleAmount = n(soldPrice)
+  const grossSaleAmount = n(form.soldFor) > 0 ? n(form.soldFor) : n(soldPrice)
+
+  const collectedAmount = n(form.collectedAmount)
+  const dmvFeePaid = n(form.dmvFeePaid)
+  const amountAfterFee = collectedAmount - dmvFeePaid
+  const profit = amountAfterFee - costPrice
 
   const totalExpenses =
+    dmvFeePaid +
     n(form.registrationFee) +
     n(form.titleFee) +
     n(form.discountGiven) +
@@ -65,14 +57,16 @@ function computeTotals(form, soldPrice) {
   const companyTaxCost = n(form.taxRemittedByCompany) + n(form.otherTaxesFees)
   const totalTaxes = n(form.customerSalesTax) + companyTaxCost
   const netCost = totalInvestment + totalExpenses + companyTaxCost
-  const grossProfit = grossSaleAmount - totalInvestment
-  const netProfit = grossSaleAmount - netCost
+  const grossProfit = profit
+  const netProfit = collectedAmount - netCost
 
   return {
     totalAcquisitionCost,
     totalReconCost,
     totalInvestment,
     grossSaleAmount,
+    amountAfterFee,
+    profit,
     totalExpenses,
     totalTaxes,
     netCost,
@@ -117,13 +111,13 @@ export function AdminVehicleFinance() {
       const f = v.finance || {}
       setForm({
         purchasePrice: f.purchasePrice ?? '',
-        purchaseDate: f.purchaseDate ? f.purchaseDate.slice(0, 10) : '',
-        acquisitionSource: f.acquisitionSource || '',
-        acquisitionTax: f.acquisitionTax ?? '',
-        acquisitionFees: f.acquisitionFees ?? '',
-        transportationCost: f.transportationCost ?? '',
-        auctionFees: f.auctionFees ?? '',
-        otherAcquisitionCost: f.otherAcquisitionCost ?? '',
+        // Pre-fill from the listing / completed sale until set here
+        listedFor: f.listedFor || v.price || '',
+        listedAmount: f.listedAmount ?? '',
+        minimumPrice: f.minimumPrice ?? '',
+        soldFor: f.soldFor || v.soldPrice || '',
+        collectedAmount: f.collectedAmount ?? '',
+        dmvFeePaid: f.dmvFeePaid ?? '',
         reconditioningCost: f.reconditioningCost ?? '',
         otherPrepCost: f.otherPrepCost ?? '',
         customerSalesTax: f.customerSalesTax ?? '',
@@ -212,17 +206,22 @@ export function AdminVehicleFinance() {
           Financial Summary {saving ? '' : savedTotals ? '(saved)' : '(unsaved preview)'}
         </h2>
         <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <SummaryTile label="Cost Price" value={n(form.purchasePrice)} />
+          <SummaryTile label="Sold For" value={liveTotals.grossSaleAmount} />
+          <SummaryTile label="Collected from Customer" value={n(form.collectedAmount)} />
+          <SummaryTile label="DMV Fee Paid" value={n(form.dmvFeePaid)} />
+          <SummaryTile label="Amount After Fee" value={liveTotals.amountAfterFee} />
+          <SummaryTile label="Profit" value={liveTotals.profit} emphasis />
           <SummaryTile label="Total Investment/Cost" value={liveTotals.totalInvestment} />
-          <SummaryTile label="Gross Sale Amount" value={liveTotals.grossSaleAmount} />
           <SummaryTile label="Total Expenses" value={liveTotals.totalExpenses} />
           <SummaryTile label="Total Taxes" value={liveTotals.totalTaxes} />
           <SummaryTile label="Net Cost" value={liveTotals.netCost} />
-          <SummaryTile label="Gross Profit" value={liveTotals.grossProfit} emphasis />
           <SummaryTile label="Net Profit" value={liveTotals.netProfit} emphasis />
         </div>
         <p className="text-xs text-brand-muted">
-          Sale price and sale date come from "Complete Sale" on the Vehicles list, not
-          this form. Figures above update live as you type; save to persist them.
+          Profit = Amount After Fee − Cost Price. Net Profit additionally deducts
+          reconditioning, other sale costs and company-paid taxes. Figures above update
+          live as you type; save to persist them.
         </p>
       </div>
 
@@ -230,52 +229,67 @@ export function AdminVehicleFinance() {
         <CollapsibleSection title="Acquisition Costs" defaultOpen>
           <div className="grid gap-4 sm:grid-cols-3">
             <Input
-              label="Purchase Price"
+              label="Cost Price"
               type="number"
               value={form.purchasePrice}
               onChange={(e) => updateField('purchasePrice', e.target.value)}
+              helperText="How much the vehicle cost us."
             />
             <Input
-              label="Purchase Date"
-              type="date"
-              value={form.purchaseDate}
-              onChange={(e) => updateField('purchaseDate', e.target.value)}
-            />
-            <Select
-              label="Acquisition Source"
-              value={form.acquisitionSource}
-              options={acquisitionSourceOptions}
-              onChange={(e) => updateField('acquisitionSource', e.target.value)}
-            />
-            <Input
-              label="Acquisition Tax"
+              label="Listed For"
               type="number"
-              value={form.acquisitionTax}
-              onChange={(e) => updateField('acquisitionTax', e.target.value)}
+              value={form.listedFor}
+              onChange={(e) => updateField('listedFor', e.target.value)}
+              helperText="The price at which we listed the vehicle."
             />
             <Input
-              label="Acquisition Fees"
+              label="Listed"
               type="number"
-              value={form.acquisitionFees}
-              onChange={(e) => updateField('acquisitionFees', e.target.value)}
+              value={form.listedAmount}
+              onChange={(e) => updateField('listedAmount', e.target.value)}
+              helperText="The amount for which we listed the vehicle."
             />
             <Input
-              label="Transportation Cost"
+              label="Minimum Price"
               type="number"
-              value={form.transportationCost}
-              onChange={(e) => updateField('transportationCost', e.target.value)}
+              value={form.minimumPrice}
+              onChange={(e) => updateField('minimumPrice', e.target.value)}
+              helperText="The lowest price we are willing to sell at."
             />
             <Input
-              label="Auction Fees"
+              label="Sold For"
               type="number"
-              value={form.auctionFees}
-              onChange={(e) => updateField('auctionFees', e.target.value)}
+              value={form.soldFor}
+              onChange={(e) => updateField('soldFor', e.target.value)}
+              helperText="The actual price the vehicle sold for."
             />
             <Input
-              label="Other Acquisition Cost"
+              label="Collected Amount from Customer"
               type="number"
-              value={form.otherAcquisitionCost}
-              onChange={(e) => updateField('otherAcquisitionCost', e.target.value)}
+              value={form.collectedAmount}
+              onChange={(e) => updateField('collectedAmount', e.target.value)}
+            />
+            <Input
+              label="DMV Fee Paid"
+              type="number"
+              value={form.dmvFeePaid}
+              onChange={(e) => updateField('dmvFeePaid', e.target.value)}
+            />
+            <Input
+              label="Amount After Fee"
+              type="number"
+              value={liveTotals.amountAfterFee}
+              readOnly
+              disabled
+              helperText="Collected Amount − DMV Fee Paid"
+            />
+            <Input
+              label="Profit"
+              type="number"
+              value={liveTotals.profit}
+              readOnly
+              disabled
+              helperText="Amount After Fee − Cost Price"
             />
           </div>
         </CollapsibleSection>

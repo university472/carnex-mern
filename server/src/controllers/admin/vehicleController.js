@@ -453,13 +453,12 @@ async function adminUpdateVehicleFinance(req, res, next) {
 
     const financeFields = [
       'purchasePrice',
-      'purchaseDate',
-      'acquisitionSource',
-      'acquisitionTax',
-      'acquisitionFees',
-      'transportationCost',
-      'auctionFees',
-      'otherAcquisitionCost',
+      'listedFor',
+      'listedAmount',
+      'minimumPrice',
+      'soldFor',
+      'collectedAmount',
+      'dmvFeePaid',
       'reconditioningCost',
       'otherPrepCost',
       'customerSalesTax',
@@ -474,7 +473,7 @@ async function adminUpdateVehicleFinance(req, res, next) {
 
     // A field sent as '' means the admin cleared it — reset it rather than
     // silently keeping the old value.
-    const clearableFields = ['purchaseDate', 'acquisitionSource', 'notes']
+    const clearableFields = ['notes']
     const mergedFinance = { ...(existingVehicle.finance || {}) }
     for (const field of financeFields) {
       const value = req.body[field]
